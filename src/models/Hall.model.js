@@ -16,6 +16,14 @@ const HallSchema = new mongoose.Schema(
       maxlength: 200,
       index: true,
     },
+    hall_name: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 3,
+      maxlength: 200,
+      index: true,
+    },
     capacity: {
       type: Number,
       required: true,
@@ -31,11 +39,16 @@ const HallSchema = new mongoose.Schema(
       default: true,
       index: true,
     },
+    imageUrl: {
+      type: String,
+      trim: true,
+      default: "",
+    },
   },
   { timestamps: true }
 );
 
 // Optional compound index for faster listing/filtering
-HallSchema.index({ location: 1, capacity: 1, pricePerPerson: 1, available: 1 });
+HallSchema.index({ location: 1, capacity: 1, pricePerPerson: 1, available: 1, hall_name: 1, imageUrl: 1 });
 
 module.exports = mongoose.model("Hall", HallSchema);
