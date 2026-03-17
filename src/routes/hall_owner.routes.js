@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const enquiryServices = require("../services/enquiry.service");
+const enquiryController = require("../services/enquiry.service");
 
-router.get("/get_enquiry", enquiryServices.listEnquiries);
+router.get("/get_enquiry", enquiryController.listEnquiries);
 
 module.exports = router;

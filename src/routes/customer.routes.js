@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const customerService = require("../services/customer.service");
+const customerController = require("../services/customer.service");
 
-router.get("/get_customers", customerService.listCustomers);
+router.get("/get_customers", customerController.listCustomers);
 
 // router.get("/customers/:id", customerService.getCustomerById);
 

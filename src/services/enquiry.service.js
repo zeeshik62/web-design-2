@@ -1,5 +1,33 @@
 const Enquiry = require("../models/Enquiry.model");
 
+class EnquiryController {
+  async listEnquiries(req, res) {
+    try {
+      const { customer_id, hall_id, status } = req.query;
+
+      const filter = {};
+
+      if (customer_id) filter.customer_id = customer_id;
+      if (hall_id) filter.hall_id = hall_id;
+      if (status) filter.status = status;
+
+      const enquiries = await Enquiry.find(filter).sort({ createdAt: -1 });
+
+      return res.status(200).json({
+        success: true,
+        data: enquiries
+      });
+
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        message: err.message
+      });
+    }
+  }
+}
+
+module.exports = new EnquiryController();
 // async function getEnquiryById(req, res) {
 //   try {
 //     const { id } = req.params;
@@ -14,25 +42,3 @@ const Enquiry = require("../models/Enquiry.model");
 //     return res.status(400).json({ success: false, message: err.message });
 //   }
 // }
-
-async function listEnquiries(req, res) {
-  try {
-    const { customer_id, hall_id, status } = req.query;
-
-    const filter = {};
-    if (customer_id) filter.customer_id = customer_id;
-    if (hall_id) filter.hall_id = hall_id;
-    if (status) filter.status = status;
-
-    const enquiries = await Enquiry.find(filter).sort({ createdAt: -1 });
-
-    return res.status(200).json({ success: true, data: enquiries });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
-  }
-}
-
-module.exports = { 
-    // getEnquiryById, 
-    listEnquiries 
-};
