@@ -20,12 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Initialize view specific data
             loadViewData(target);
         });
     });
 
-    // Initial Load
     loadViewData('halls');
 });
 
