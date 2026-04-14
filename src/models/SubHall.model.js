@@ -23,7 +23,10 @@ const SubHallSchema = new mongoose.Schema({
   address: { type: AddressSchema, required: true },
   menu: { type: MenuSchema, default: {} },
   images: [{ type: String }],
-  instructions: { type: String }
+  instructions: { type: String },
+  discount: { type: Number, default: null },
+  starting_price: { type: Number, default: 0 },
+  is_public: { type: Boolean, default: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model("SubHall", SubHallSchema);

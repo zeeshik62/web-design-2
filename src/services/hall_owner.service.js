@@ -1,0 +1,96 @@
+const HallOwner = require('../models/HallOwner.model');
+
+class HallOwnerService {
+    updateProfile = async (req, res) => {
+        try {
+            const { name, brand_name, contact, address, image, is_public } = req.body;
+            const ownerId = req.user.owner_id;
+
+            const owner = await HallOwner.findById(ownerId);
+            if (!owner) {
+                return res.status(404).json({ success: false, message: "Hall Owner not found" });
+            }
+
+            // Update allowed fields
+            if (name !== undefined) owner.name = name;
+            if (contact !== undefined) owner.contact = contact;
+            if (address !== undefined) {
+                if (!address.street_address || !address.city || !address.country) {
+                    return res.status(400).json({ success: false, message: "Incomplete address object" });
+                }
+                owner.address = address;
+            }
+            if (image !== undefined) owner.image = image;
+            if (is_public !== undefined) owner.is_public = is_public;
+
+            // Generate new slug if brand_name changes
+            if (brand_name && brand_name !== owner.brand_name) {
+                const generatedSlug = brand_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+                const existingOwner = await HallOwner.findOne({
+                    _id: { $ne: ownerId },
+                    $or: [
+                        { brand_name: brand_name },
+                        { slug: generatedSlug }
+                    ]
+                });
+
+                if (existingOwner) {
+                    return res.status(400).json({ success: false, message: "This brand name is already registered. Please choose a different name." });
+                }
+
+                owner.brand_name = brand_name;
+                owner.slug = generatedSlug;
+            }
+
+            await owner.save();
+
+            return res.status(200).json({ 
+                success: true, 
+                message: "Profile updated successfully", 
+                data: {
+                    owner_id: owner._id,
+                    name: owner.name,
+                    brand_name: owner.brand_name,
+                    slug: owner.slug,
+                    email: owner.email,
+                    contact: owner.contact,
+                    address: owner.address,
+                    image: owner.image,
+                    is_public: owner.is_public
+                } 
+            });
+        } catch (error) {
+            // Handle duplicate brand_name/slug errors
+            if (error.code === 11000) {
+                return res.status(400).json({ success: false, message: "Brand name already exists" });
+            }
+            return res.status(500).json({ success: false, message: error.message });
+        }
+    };
+
+    toggleIsPublic = async (req, res) => {
+        try {
+            const ownerId = req.user.owner_id;
+            const owner = await HallOwner.findById(ownerId);
+            
+            if (!owner) {
+                return res.status(404).json({ success: false, message: "Hall Owner not found" });
+            }
+
+            owner.is_public = !owner.is_public;
+            await owner.save();
+
+            return res.status(200).json({ 
+                success: true, 
+                message: `Profile visibility is now manually toggled to ${owner.is_public ? 'public' : 'private'}`, 
+                data: { is_public: owner.is_public } 
+            });
+        } catch (error) {
+            console.error("toggleIsPublic Error:", error);
+            return res.status(500).json({ success: false, message: error.message });
+        }
+    };
+}
+
+module.exports = new HallOwnerService();

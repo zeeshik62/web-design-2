@@ -6,15 +6,15 @@ const sendEmail = require("../utils/sendEmail");
 class AuthService {
   register = async (req, res) => {
     try {
-      const { name, brand_name, email, password, otp } = req.body;
-      
-      if (!name || !brand_name || !email || !password) {
-        return res.status(400).json({ success: false, message: "Please provide all required fields" });
+      const { name, brand_name, email, password, contact, address, image } = req.body;
+
+      if (!name || !brand_name || !email || !password || !contact || !address || !address.street_address || !address.city || !address.country) {
+        return res.status(400).json({ success: false, message: "Please provide all required fields including address" });
       }
 
       const generatedSlug = brand_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
-      const existingOwner = await HallOwner.findOne({ 
+      const existingOwner = await HallOwner.findOne({
         $or: [
           { email: email.toLowerCase() },
           { slug: generatedSlug },
@@ -28,26 +28,35 @@ class AuthService {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
+      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
       const newOwner = await HallOwner.create({
         name,
         brand_name,
         slug: generatedSlug,
         email: email.toLowerCase(),
         password: hashedPassword,
-        otp: otp || null
+        contact,
+        address,
+        image: image || "",
+        otp: generatedOtp
+        // is_verified remains false uniquely native by schema default
       });
+
+      const message = `Welcome to HMS! Your registration verification OTP is: ${generatedOtp}\nPlease use this OTP to securely verify your account identity to login.`;
+      try {
+        await sendEmail({
+          email: newOwner.email,
+          subject: "Registration verification OTP",
+          message,
+        });
+      } catch (err) {
+        console.error("Failed to send OTP email:", err);
+      }
 
       return res.status(201).json({
         success: true,
-        message: "Hall Owner registered successfully",
-        data: {
-          owner_id: newOwner._id,
-          name: newOwner.name,
-          brand_name: newOwner.brand_name,
-          slug: newOwner.slug,
-          email: newOwner.email,
-          created_at: newOwner.created_at
-        }
+        message: "Your account has been created successfully. Please verify your account using the OTP sent to your email."
       });
     } catch (err) {
       return res.status(500).json({ success: false, message: err.message });
@@ -72,6 +81,10 @@ class AuthService {
         return res.status(401).json({ success: false, message: "Invalid credentials" });
       }
 
+      if (!owner.is_verified) {
+        return res.status(403).json({ success: false, message: "Your account is not verified. Please use the OTP we sent to verify your account to login" });
+      }
+
       const payload = {
         owner_id: owner._id,
         name: owner.name,
@@ -86,6 +99,54 @@ class AuthService {
       return res.status(200).json({
         success: true,
         message: "Logged in successfully",
+        token,
+        data: {
+          owner_id: owner._id,
+          name: owner.name,
+          email: owner.email
+        }
+      });
+    } catch (err) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  };
+
+  verifyRegistration = async (req, res) => {
+    try {
+      const { email, otp } = req.body;
+
+      if (!email || !otp) {
+        return res.status(400).json({ success: false, message: "Please provide email and otp" });
+      }
+
+      const owner = await HallOwner.findOne({ email: email.toLowerCase() });
+      if (!owner) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+
+      if (owner.otp !== otp) {
+        return res.status(400).json({ success: false, message: "Invalid OTP" });
+      }
+
+      // Mark as verified and clear OTP
+      owner.is_verified = true;
+      owner.otp = null;
+      await owner.save();
+
+      const payload = {
+        owner_id: owner._id,
+        name: owner.name,
+        brand_name: owner.brand_name,
+        slug: owner.slug,
+        email: owner.email,
+        role: "hall_owner"
+      };
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET || "HMS_SECRET_KEY", { expiresIn: "1d" });
+
+      return res.status(200).json({
+        success: true,
+        message: "Account verified successfully",
         token,
         data: {
           owner_id: owner._id,
