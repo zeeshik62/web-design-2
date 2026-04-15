@@ -19,7 +19,7 @@ const QuerySchema = new mongoose.Schema(
 
     hall_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Hall",
+      ref: "SubHall",
       required: true,
       index: true,
     },
