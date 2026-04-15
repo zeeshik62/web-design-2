@@ -1,0 +1,59 @@
+extends layout
+
+block styles
+    style.
+        .page-header {
+            padding: 4rem 0 2rem;
+            text-align: center;
+        }
+        .page-header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        .filter-btn.active, .filter-btn:hover {
+            border-color: var(--primary);
+            color: #fff;
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+block content
+    div.container
+        div.page-header
+            h1 Discover Halls
+            p.text-secondary(style="font-size: 1.1rem;") Browse through our collection of premium venues for your next event.
+            
+        //- div.filters
+        //-     button.filter-btn.active All
+        //-     button.filter-btn Marquee
+        //-     button.filter-btn Banquet Hall
+        //-     button.filter-btn Conference Room
+        
+        div#halls-grid.grid
+            //- Data will be injected here via frontend.js
+            div.loading-spinner(style="grid-column: 1 / -1; text-align: center; padding: 4rem 0; color: var(--text-secondary);")
+                i.fas.fa-circle-notch.fa-spin(style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem; display: block;")
+                span Loading venues...
+
+block scripts
+    script.
+        // The halls grid will be populated by frontend.js

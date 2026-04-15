@@ -1,0 +1,335 @@
+extends layout
+
+block styles
+    style.
+        .detail-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+        .main-image {
+            width: 100%;
+            height: 450px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .main-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .hall-type-tag {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border-radius: 50px;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        .detail-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .detail-stat {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .detail-stat i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        .section-title {
+            font-size: 1.75rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+        }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+        .menu-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+        .menu-card h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .menu-list {
+            list-style: none;
+            padding: 0;
+        }
+        .menu-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-secondary);
+        }
+
+block content
+    style.
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        .modal input, .modal textarea {
+            width: 100%;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            border-radius: 10px;
+            color: #fff;
+            margin-top: 0.5rem;
+        }
+    
+    //- Auth Modal (Login/Register)
+    div#auth-modal.modal-overlay
+        div.modal
+            span.close-btn(onclick="closeModal('auth-modal')") &times;
+            h2#auth-title(style="margin-bottom: 1.5rem;") Login
+            
+            div#login-form-area
+                form#customer-login-form
+                    div(style="margin-bottom: 1rem;")
+                        label Email Address
+                        input(type="email" name="email" required)
+                    div(style="margin-bottom: 1.5rem;")
+                        label Password
+                        input(type="password" name="password" required)
+                    button.btn.btn-primary(type="submit" style="width: 100%") Login
+                p(style="margin-top: 1rem; text-align: center; color: var(--text-secondary);") Don't have an account? 
+                    a(href="#" onclick="switchAuthMode()" style="color: var(--primary); text-decoration: none;") Register
+                    
+            div#register-form-area(style="display: none;")
+                form#customer-register-form
+                    div(style="margin-bottom: 1rem;")
+                        label Full Name
+                        input(type="text" name="name" required)
+                    div(style="margin-bottom: 1rem;")
+                        label Email Address
+                        input(type="email" name="email" required)
+                    div(style="margin-bottom: 1.5rem;")
+                        label Password
+                        input(type="password" name="password" required)
+                    button.btn.btn-primary(type="submit" style="width: 100%") Register
+                p(style="margin-top: 1rem; text-align: center; color: var(--text-secondary);") Already have an account? 
+                    a(href="#" onclick="switchAuthMode()" style="color: var(--primary); text-decoration: none;") Login
+
+    //- Query Modal
+    div#query-modal.modal-overlay
+        div.modal
+            span.close-btn(onclick="closeModal('query-modal')") &times;
+            h2(style="margin-bottom: 1.5rem;") Send a Query
+            form#query-form
+                input#query-slug(type="hidden")
+                div(style="margin-bottom: 1rem;")
+                    label Event Date
+                    input(type="date" name="date" required)
+                div(style="margin-bottom: 1.5rem;")
+                    label Describe your event requirements
+                    textarea(name="description" rows="4" placeholder="e.g. Total guests, timing, specific menu requirements..." required)
+                button.btn.btn-primary(type="submit" style="width: 100%") Submit Query
+
+    div#hall-detail-container.container
+        div.loading-spinner 
+            i.fas.fa-circle-notch.fa-spin
+            span Fetching hall details...
+
+block scripts
+    script.
+        async function renderHallDetail() {
+            const slug = window.location.pathname.split('/').pop();
+            const container = document.getElementById('hall-detail-container');
+            
+            const hall = await HMS.fetchHallBySlug(slug);
+            if (!hall) {
+                container.innerHTML = '<h2>Hall not found</h2>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="detail-header">
+                    <div class="main-image">
+                        <img src="${hall.images[0] || 'https://via.placeholder.com/800x600?text=No+Image'}" alt="${hall.subhall_name}">
+                    </div>
+                    <div class="info-panel">
+                        <span class="hall-type-tag">${hall.type}</span>
+                        <h1 class="view-title">${hall.subhall_name}</h1>
+                        <p class="text-secondary"><i class="fas fa-location-dot"></i> ${hall.address.street_address}, ${hall.address.city}, ${hall.address.country}</p>
+                        
+                        <div class="detail-stats">
+                            <div class="detail-stat">
+                                <i class="fas fa-users"></i>
+                                <div>
+                                    <p class="text-secondary">Capacity</p>
+                                    <strong>${hall.sitting_capacity} Guests</strong>
+                                </div>
+                            </div>
+                            <div class="detail-stat">
+                                <i class="fas fa-car"></i>
+                                <div>
+                                    <p class="text-secondary">Parking</p>
+                                    <strong>${hall.parking_capacity} Spots</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="booking-actions" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                            <button class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 1rem;" onclick="handleBookClick('${hall.slug}')">Book This Venue</button>
+                            <button class="btn btn-outline" style="width: 100%; font-size: 1.1rem; padding: 1rem; border: 1px solid var(--border); background: transparent; color: #fff;" onclick="handleWhatsAppClick('${hall.hall_owner_id.contact}')">
+                                <i class="fab fa-whatsapp" style="color: #25d366; margin-right: 0.5rem;"></i> Contact on WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="section-title">Exclusive Menus</h3>
+                <div class="menu-grid">
+                    ${renderMenuCategory('Starters', hall.menu.starter)}
+                    ${renderMenuCategory('Main Course', hall.menu.main_course)}
+                    ${renderMenuCategory('Drinks', hall.menu.drinks)}
+                    ${renderMenuCategory('Desserts', hall.menu.desserts)}
+                </div>
+
+                <h3 class="section-title">Instructions & Policies</h3>
+                <div class="recent-card">
+                    <p class="text-secondary">${hall.instructions || 'No specific instructions provided.'}</p>
+                </div>
+            `;
+        }
+
+        // Modal Handlers
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function switchAuthMode() {
+            const loginArea = document.getElementById('login-form-area');
+            const registerArea = document.getElementById('register-form-area');
+            const title = document.getElementById('auth-title');
+            
+            if (loginArea.style.display === 'none') {
+                loginArea.style.display = 'block';
+                registerArea.style.display = 'none';
+                title.innerText = 'Login';
+            } else {
+                loginArea.style.display = 'none';
+                registerArea.style.display = 'block';
+                title.innerText = 'Register';
+            }
+        }
+
+        // Action Handlers
+        function checkAuth() {
+            return !!localStorage.getItem('hms_customer_token');
+        }
+
+        function handleBookClick(slug) {
+            if (!checkAuth()) {
+                openModal('auth-modal');
+                return;
+            }
+            document.getElementById('query-slug').value = slug;
+            openModal('query-modal');
+        }
+
+        function handleWhatsAppClick(contact) {
+            if (!checkAuth()) {
+                openModal('auth-modal');
+                return;
+            }
+            // Sanitize contact: remove non-numeric
+            const cleanContact = contact.replace(/\D/g, '');
+            window.open(`https://wa.me/${cleanContact}`, '_blank');
+        }
+
+        // Form Submissions
+        document.getElementById('customer-login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            const success = await HMS.loginCustomer(data.email, data.password);
+            if (success) {
+                closeModal('auth-modal');
+                HMS.notify('Logged in successfully!');
+            }
+        };
+
+        document.getElementById('customer-register-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            const success = await HMS.registerCustomer(data);
+            if (success) switchAuthMode();
+        };
+
+        document.getElementById('query-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            data.subhall_slug = document.getElementById('query-slug').value;
+            const success = await HMS.submitQuery(data);
+            if (success) {
+                closeModal('query-modal');
+                e.target.reset();
+            }
+        };
+
+        function renderMenuCategory(name, items) {
+            if (!items || items.length === 0) return '';
+            return `
+                <div class="menu-card">
+                    <h4>${name}</h4>
+                    <ul class="menu-list">
+                        ${items.map(item => `<li><i class="fas fa-check" style="color: var(--accent-green); font-size: 0.8rem; margin-right: 0.5rem;"></i> ${item}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        renderHallDetail();
