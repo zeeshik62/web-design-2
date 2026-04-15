@@ -1,0 +1,114 @@
+extends ../layout
+
+block styles
+    style.
+        .login-box {
+            max-width: 450px;
+            margin: 6rem auto;
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .login-box h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .form-control {
+            width: 100%;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            color: #fff;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+        .login-footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .login-footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+block content
+    div.container
+        div.login-box
+            h1 Owner Login
+            form#login-form
+                div.form-group
+                    label(for="email") Email Address
+                    input#email.form-control(type="email" placeholder="owner@example.com" required)
+                div.form-group
+                    label(for="password") Password
+                    input#password.form-control(type="password" placeholder="••••••••" required)
+                div(style="text-align: right; margin-bottom: 1rem;")
+                    a(href="/owner/forgot-password" style="font-size: 0.85rem; color: var(--primary); text-decoration: none;") Forgot Password?
+                button.btn.btn-primary.login-btn(type="submit") Login to Portal
+            
+            div.login-footer
+                p Don't have an account? 
+                    a(href="/owner/register") Register your business
+
+    div#otp-modal(style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center;")
+        div(style="background: var(--card-bg); padding: 2.5rem; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid var(--border); position: relative;")
+            span(onclick="document.getElementById('otp-modal').style.display='none'" style="position: absolute; top: 1rem; right: 1.5rem; cursor: pointer; color: var(--text-secondary); font-size: 1.5rem;") &times;
+            h2(style="margin-bottom: 1rem; text-align: center;") Verify Account
+            p.text-secondary(style="margin-bottom: 1.5rem; text-align: center;") Enter the OTP sent to your email
+            form#otp-form
+                input#otp-email(type="hidden")
+                div.form-group
+                    input#otp-code.form-control(type="text" placeholder="Enter 6-digit OTP" required style="text-align: center; font-size: 1.25rem; letter-spacing: 5px;")
+                button.btn.btn-primary.login-btn(type="submit") Verify & Login
+
+block scripts
+    script.
+        const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const result = await HMS.loginOwner(email, password);
+            if (result.success) {
+                window.location.href = '/owner/dashboard';
+            } else if (result.needsVerification) {
+                document.getElementById('otp-email').value = result.email;
+                document.getElementById('otp-modal').style.display = 'flex';
+            }
+        });
+
+        const otpForm = document.getElementById('otp-form');
+        otpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('otp-email').value;
+            const otpCode = document.getElementById('otp-code').value;
+            const verified = await HMS.verifyOwner(email, otpCode);
+            if (verified) {
+                window.location.href = '/owner/dashboard';
+            }
+        });
