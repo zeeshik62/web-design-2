@@ -1,0 +1,46 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title #{title} | HMS Pro
+        link(rel="preconnect" href="https://fonts.googleapis.com")
+        link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+        link(href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet")
+        link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
+        link(rel="stylesheet" href="/css/style.css")
+        block styles
+    body
+        nav.navbar
+            div.container
+                div.nav-left
+                    a.logo(href="/")
+                        i.fas.fa-building-circle-check
+                        span HMS
+                    ul.nav-links
+                        li: a(href="/") Halls
+                
+                div.nav-right
+                    ul.nav-links#guest-links
+                        li: a(href="/login") Login
+                        li: a(href="/register") Sign Up
+                        li: a(href="/owner/login" class="owner-link") Owner Portal
+                    
+                    div#user-nav.user-nav(style="display: none;")
+                        div.user-info
+                            div.avatar#user-avatar ?
+                            span.name#user-name User
+                        button.btn-logout(onclick="HMS.logoutCustomer()" title="Logout")
+                            i.fas.fa-sign-out-alt
+                        li: a(href="/owner/login" class="owner-link") Owner Portal
+
+        
+        main.content
+            block content
+
+        footer.footer
+            div.container
+                p &copy; 2026 HMS Pro - Hall Management System. All rights reserved.
+
+        script(src="/js/frontend.js")
+        block scripts
