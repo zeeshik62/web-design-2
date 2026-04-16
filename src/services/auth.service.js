@@ -82,6 +82,19 @@ class AuthService {
       }
 
       if (!owner.is_verified) {
+        const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+        owner.otp = generatedOtp;
+        await owner.save();
+        const message = `Welcome to HMS! Your registration verification OTP is: ${generatedOtp}\nPlease use this OTP to securely verify your account identity to login.`;
+        try {
+          await sendEmail({
+            email: owner.email,
+            subject: "Registration verification OTP",
+            message,
+          });
+        } catch (err) {
+          console.error("Failed to send OTP email:", err);
+        }
         return res.status(403).json({ success: false, message: "Your account is not verified. Please use the OTP we sent to verify your account to login" });
       }
 

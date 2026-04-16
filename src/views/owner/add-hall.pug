@@ -1,0 +1,204 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title Add New Hall | HMS Pro
+        link(rel="preconnect" href="https://fonts.googleapis.com")
+        link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+        link(href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet")
+        link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
+        link(rel="stylesheet" href="/css/style.css")
+        style.
+            body { display: flex; overflow: hidden; height: 100vh; }
+            .content { flex-grow: 1; overflow-y: auto; padding: 2rem 3rem; }
+            .form-section { background: var(--card-bg); padding: 2.5rem; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 2rem; }
+            .form-section h2 { margin-bottom: 2rem; font-size: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+            .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+            .full-width { grid-column: span 2; }
+            .form-group { margin-bottom: 1.5rem; }
+            .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem; }
+            .form-control { width: 100%; background: var(--bg-dark); border: 1px solid var(--border); padding: 0.75rem 1rem; border-radius: 10px; color: #fff; outline: none; transition: border-color 0.3s; }
+            .form-control:focus { border-color: var(--primary); }
+            .menu-input-group { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+            .tag-container { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+            .menu-tag { background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; }
+            .menu-tag i { cursor: pointer; }
+    body
+        nav.sidebar
+            div.logo
+                i.fas.fa-building-circle-check
+                span HMS Pro
+            ul.nav-links
+                li(onclick="window.location.href='/owner/dashboard'")
+                    i.fas.fa-chart-pie
+                    span Dashboard
+                li(onclick="window.location.href='/owner/halls'")
+                    i.fas.fa-hotel
+                    span My Halls
+                li.active(onclick="window.location.href='/owner/add-hall'")
+                    i.fas.fa-plus-circle
+                    span Add Hall
+                li(onclick="window.location.href='/owner/queries'")
+                    i.fas.fa-envelope-open-text
+                    span Enquiries
+                li(onclick="window.location.href='/owner/customers'")
+                    i.fas.fa-users
+                    span Customers
+            
+            div.user-profile
+                div#owner-avatar.avatar AD
+                div.info
+                    p#owner-name.name Loading...
+                    p.role Hall Owner
+
+        main.content
+            header
+                h1 Add New Hall
+                div.header-actions
+                    button.btn.btn-primary#save-btn
+                        i.fas.fa-save
+                        |  Save Hall
+            
+            form#add-hall-form
+                section.form-section
+                    h2 Basic Information
+                    div.form-grid
+                        div.form-group
+                            label Hall Name
+                            input.form-control#hall_name(type="text" placeholder="e.g. Royal Banquet" required)
+                        div.form-group
+                            label Hall Type
+                            select.form-control#type(required)
+                                option(value="Marquee") Marquee
+                                option(value="Open Roof") Open Roof
+                                option(value="Banquet Hall") Banquet Hall
+                                option(value="Conference Room") Conference Room
+                                option(value="Other") Other
+                        div.form-group
+                            label Sitting Capacity
+                            input.form-control#sitting_capacity(type="number" placeholder="500" required min="1")
+                        div.form-group
+                            label Parking Capacity
+                            input.form-control#parking_capacity(type="number" placeholder="50" required min="0")
+
+                section.form-section
+                    h2 Location Details
+                    div.form-grid
+                        div.form-group.full-width
+                            label Street Address
+                            input.form-control#street_address(type="text" placeholder="123 Business Way" required)
+                        div.form-group
+                            label City
+                            input.form-control#city(type="text" placeholder="New York" required)
+                        div.form-group
+                            label Country
+                            input.form-control#country(type="text" placeholder="USA" required)
+
+                section.form-section
+                    h2 Menus & Services
+                    div.form-grid
+                        div.form-group
+                            label Starters (Press Enter to add)
+                            div.menu-input-group
+                                input.form-control#starter-input(type="text" placeholder="e.g. Spring Rolls")
+                            div#starter-tags.tag-container
+                        div.form-group
+                            label Main Course
+                            div.menu-input-group
+                                input.form-control#main-input(type="text" placeholder="e.g. Chicken Tikka")
+                            div#main-tags.tag-container
+                        div.form-group
+                            label Drinks
+                            div.menu-input-group
+                                input.form-control#drinks-input(type="text" placeholder="e.g. Mint Margarita")
+                            div#drinks-tags.tag-container
+                        div.form-group
+                            label Desserts
+                            div.menu-input-group
+                                input.form-control#desserts-input(type="text" placeholder="e.g. Ice Cream")
+                            div#desserts-tags.tag-container
+
+                section.form-section
+                    h2 Additional Info
+                    div.form-group
+                        label Instructions & Policies
+                        textarea.form-control#instructions(rows="4" placeholder="Mention any specific rules or information for customers...")
+                    div.form-group(style="margin-top: 1.5rem;")
+                        label Images (URLs, one per line)
+                        textarea.form-control#images(rows="3" placeholder="https://example.com/image1.jpg")
+
+        script(src="/js/frontend.js")
+        script.
+            // Check auth
+            const token = localStorage.getItem('hms_token');
+            if (!token) window.location.href = '/owner/login';
+
+            const owner = JSON.parse(localStorage.getItem('hms_owner') || '{}');
+            document.getElementById('owner-name').textContent = owner.name || 'Owner';
+            document.getElementById('owner-avatar').textContent = (owner.name || 'O').charAt(0).toUpperCase();
+
+            // Menu tag management
+            const menus = { starter: [], main_course: [], drinks: [], desserts: [] };
+
+            function setupMenuInput(id, category) {
+                const input = document.getElementById(id);
+                const container = document.getElementById(category + '-tags');
+                
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const val = input.value.trim();
+                        if (val && !menus[category].includes(val)) {
+                            menus[category].push(val);
+                            renderTags(category);
+                            input.value = '';
+                        }
+                    }
+                });
+            }
+
+            function renderTags(category) {
+                const container = document.getElementById(category + '-tags');
+                container.innerHTML = menus[category].map((item, index) => `
+                    <span class="menu-tag">${item} <i class="fas fa-times" onclick="removeTag('${category}', ${index})"></i></span>
+                `).join('');
+            }
+
+            window.removeTag = (category, index) => {
+                menus[category].splice(index, 1);
+                renderTags(category);
+            };
+
+            setupMenuInput('starter-input', 'starter');
+            setupMenuInput('main-input', 'main_course');
+            setupMenuInput('drinks-input', 'drinks');
+            setupMenuInput('desserts-input', 'desserts');
+
+            // Submit handler
+            document.getElementById('save-btn').addEventListener('click', async () => {
+                const hallData = {
+                    subhall_name: document.getElementById('hall_name').value,
+                    type: document.getElementById('type').value,
+                    sitting_capacity: parseInt(document.getElementById('sitting_capacity').value),
+                    parking_capacity: parseInt(document.getElementById('parking_capacity').value),
+                    address: {
+                        street_address: document.getElementById('street_address').value,
+                        city: document.getElementById('city').value,
+                        country: document.getElementById('country').value
+                    },
+                    menu: menus,
+                    instructions: document.getElementById('instructions').value,
+                    images: document.getElementById('images').value.split('\n').filter(url => url.trim())
+                };
+
+                if (!hallData.subhall_name || !hallData.address.street_address) {
+                    alert('Please fill in at least the hall name and address.');
+                    return;
+                }
+
+                const success = await HMS.createHall(hallData);
+                if (success) {
+                    window.location.href = '/owner/halls';
+                }
+            });

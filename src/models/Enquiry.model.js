@@ -19,7 +19,7 @@ const QuerySchema = new mongoose.Schema(
 
     hall_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Hall",
+      ref: "SubHall",
       required: true,
       index: true,
     },
@@ -31,7 +31,7 @@ const QuerySchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "responded", "ignored"],
+      enum: ["pending", "responded", "spam"],
       default: "pending",
       index: true,
     },
