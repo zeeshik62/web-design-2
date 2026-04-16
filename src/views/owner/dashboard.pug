@@ -62,13 +62,13 @@ html(lang="en")
                         i.fas.fa-envelope-open-text
                     div.stat-info
                         h3 New Enquiries
-                        p.count 12
+                        p#total-enquiries.count 0
                 div.stat-card
                     div.stat-icon.orange
-                        i.fas.fa-calendar-check
+                        i.fas.fa-users
                     div.stat-info
-                        h3 Total Bookings
-                        p.count 48
+                        h3 Total Customers
+                        p#total-customers.count 0
 
             div.recent-card
                 h2 Recent Activity
@@ -100,7 +100,45 @@ html(lang="en")
             document.getElementById('owner-avatar').textContent = (owner.name || 'O').charAt(0).toUpperCase();
 
             async function loadStats() {
-                const halls = await HMS.fetchOwnerHalls();
-                document.getElementById('total-halls').textContent = halls.length;
+                try {
+                    const response = await fetch('/api/hall_owner/stats', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        document.getElementById('total-halls').textContent = result.data.totalHalls;
+                        document.getElementById('total-enquiries').textContent = result.data.totalEnquiries;
+                        document.getElementById('total-customers').textContent = result.data.totalCustomers;
+                    }
+                } catch (err) {
+                    console.error('Error loading stats:', err);
+                }
             }
+
+            async function loadPendingEnquiries() {
+                const tbody = document.querySelector('table tbody');
+                try {
+                    const response = await fetch('/api/hall_owner/enquiries?status=pending&limit=5', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success && result.data.length > 0) {
+                        tbody.innerHTML = result.data.map(enq => `
+                            <tr>
+                                <td>Enquiry from "${enq.customer_id ? enq.customer_id.name : 'User'}" for "${enq.hall_id ? enq.hall_id.subhall_name : 'Hall'}"</td>
+                                <td>${new Date(enq.date).toLocaleDateString()}</td>
+                                <td><span class="status-pending status">Pending</span></td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No pending enquiries at the moment.</td></tr>';
+                    }
+                } catch (err) {
+                    console.error('Error loading enquiries:', err);
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Error loading data.</td></tr>';
+                }
+            }
+
             loadStats();
+            loadPendingEnquiries();

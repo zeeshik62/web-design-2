@@ -1,6 +1,39 @@
 const HallOwner = require('../models/HallOwner.model');
+const Enquiry = require('../models/Enquiry.model');
+const SubHall = require('../models/SubHall.model');
+const Customer = require('../models/Customer.model');
 
 class HallOwnerService {
+    getDashboardStats = async (req, res) => {
+        try {
+            const ownerId = req.user.owner_id;
+
+            // 1. Get SubHalls count
+            const subhalls = await SubHall.find({ hall_owner_id: ownerId }).select('_id');
+            const subhallIds = subhalls.map(sh => sh._id);
+            const totalHalls = subhalls.length;
+
+            // 2. Get Enquiries count for these halls
+            const totalEnquiries = await Enquiry.countDocuments({ hall_id: { $in: subhallIds } });
+            
+            // 3. Get unique Customers count (who have made enquiries)
+            const uniqueCustomers = await Enquiry.distinct("customer_id", { hall_id: { $in: subhallIds } });
+            const totalCustomers = uniqueCustomers.length;
+
+            return res.status(200).json({
+                success: true,
+                data: {
+                    totalHalls,
+                    totalEnquiries,
+                    totalCustomers
+                }
+            });
+        } catch (error) {
+            console.error("getDashboardStats Error:", error);
+            return res.status(500).json({ success: false, message: error.message });
+        }
+    };
+
     updateProfile = async (req, res) => {
         try {
             const { name, brand_name, contact, address, image, is_public } = req.body;

@@ -26,6 +26,7 @@ router.patch("/enquiries/:id/status", enquiryService.updateEnquiryStatus);
 router.get("/customers", customerService.getRelatedCustomers);
 
 // Hall Owner Profile Routes
+router.get("/stats", hallOwnerService.getDashboardStats);
 router.put("/profile", hallOwnerService.updateProfile);
 router.patch("/profile/toggle-public", hallOwnerService.toggleIsPublic);
 

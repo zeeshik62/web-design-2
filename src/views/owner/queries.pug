@@ -24,6 +24,8 @@ html(lang="en")
             .status-pending { background: #fff3cd; color: #856404; }
             .status-responded { background: #d4edda; color: #155724; }
             .status-spam { background: #f8d7da; color: #721c24; }
+            .description-cell { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; color: #666; font-size: 0.9rem; }
+            .description-cell:hover { white-space: normal; color: #333; }
     body
         nav.sidebar
             div.logo
@@ -82,6 +84,7 @@ html(lang="en")
                                 th Customer
                                 th Hall
                                 th Date
+                                th Description
                                 th Status
                                 th Action
                         tbody
@@ -146,6 +149,9 @@ html(lang="en")
                         </td>
                         <td>${enq.hall_id ? enq.hall_id.subhall_name : 'Deleted Venue'}</td>
                         <td>${new Date(enq.date).toLocaleDateString()}</td>
+                        <td>
+                            <div class="description-cell" title="${enq.description || ''}">${enq.description || 'No description'}</div>
+                        </td>
                         <td>
                             <span class="status-badge status-${enq.status}">${enq.status}</span>
                         </td>

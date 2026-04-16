@@ -416,8 +416,6 @@ async function renderOwnerHalls() {
             <td>${hall.address.city}</td>
             <td>
                 <button class="btn-icon" onclick="window.location.href='/halls/${hall.slug}'"><i class="fas fa-eye"></i></button>
-                <button class="btn-icon"><i class="fas fa-edit"></i></button>
-                <button class="btn-icon text-danger"><i class="fas fa-trash"></i></button>
             </td>
         </tr>
     `).join('') : '<tr><td colspan="5">No halls found. Add your first one!</td></tr>';
