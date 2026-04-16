@@ -81,6 +81,12 @@ html(lang="en")
                         div.form-group
                             label Parking Capacity
                             input.form-control#parking_capacity(type="number" placeholder="50" required min="0")
+                        div.form-group
+                            label Starting Price (Rs.)
+                            input.form-control#starting_price(type="number" placeholder="50000" required min="0")
+                        div.form-group
+                            label Discount Percentage (%)
+                            input.form-control#discount(type="number" placeholder="10" min="0" max="100")
 
                 section.form-section
                     h2 Location Details
@@ -187,6 +193,8 @@ html(lang="en")
                         city: document.getElementById('city').value,
                         country: document.getElementById('country').value
                     },
+                    starting_price: parseInt(document.getElementById('starting_price').value) || 0,
+                    discount: parseInt(document.getElementById('discount').value) || null,
                     menu: menus,
                     instructions: document.getElementById('instructions').value,
                     images: document.getElementById('images').value.split('\n').filter(url => url.trim())

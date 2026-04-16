@@ -353,6 +353,7 @@ async function renderHallListing(filters = {}) {
     grid.innerHTML = halls.map(hall => `
         <div class="hall-card">
             <div class="hall-img">
+                ${hall.discount ? `<div class="discount-badge">-${hall.discount}%</div>` : ''}
                 <img src="${API_BASE.replace('/api', '')}${hall.images && hall.images.length > 0 ? (hall.images[0].startsWith('/') ? hall.images[0] :  hall.images[0]) : 'https://via.placeholder.com/400x250?text=No+Image'}" alt="${hall.subhall_name}">
             </div>
             <div class="hall-content">
@@ -366,7 +367,10 @@ async function renderHallListing(filters = {}) {
                     <span><i class="fas fa-car"></i> ${hall.parking_capacity} Spots</span>
                 </div>
                 <div class="hall-footer">
-                    <div class="price">From Rs. ${hall.starting_price.toLocaleString()}</div>
+                    <div class="price">
+                        ${hall.discount ? `<span style="text-decoration: line-through; color: var(--text-secondary); font-size: 0.8rem; display: block;">Rs. ${(hall.starting_price * (1 + hall.discount/100)).toLocaleString()}</span>` : ''}
+                        <span>From Rs. ${hall.starting_price.toLocaleString()}</span>
+                    </div>
                     <a href="/halls/${hall.slug}" class="btn btn-primary" style="padding: 0.5rem 1rem; text-decoration: none; font-size: 0.85rem;">Details</a>
                 </div>
             </div>

@@ -36,7 +36,7 @@ block styles
         }
         .detail-stats {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1.5rem;
             margin: 2rem 0;
         }
@@ -203,6 +203,14 @@ block scripts
                         <p class="text-secondary"><i class="fas fa-location-dot"></i> ${hall.address.street_address}, ${hall.address.city}, ${hall.address.country}</p>
                         
                         <div class="detail-stats">
+                            <div class="detail-stat">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <div>
+                                    <p class="text-secondary">Starting Price</p>
+                                    <strong>Rs. ${hall.starting_price.toLocaleString()}</strong>
+                                    ${hall.discount ? `<span style="display: block; font-size: 0.75rem; color: #ef4444; font-weight: 700;">-${hall.discount}% OFF</span>` : ''}
+                                </div>
+                            </div>
                             <div class="detail-stat">
                                 <i class="fas fa-users"></i>
                                 <div>
