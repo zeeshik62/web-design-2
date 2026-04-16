@@ -1,53 +1,47 @@
 extends layout
 
-block styles
-    style.
-        .page-header {
-            padding: 4rem 0 2rem;
-            text-align: center;
-        }
-        .page-header h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, #fff, var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .filters {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 3rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .filter-btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 50px;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-        .filter-btn.active, .filter-btn:hover {
-            border-color: var(--primary);
-            color: #fff;
-            background: rgba(99, 102, 241, 0.1);
-        }
-
 block content
     div.container
         div.page-header
             h1 Discover Halls
             p.text-secondary(style="font-size: 1.1rem;") Browse through our collection of premium venues for your next event.
-            
-        //- div.filters
-        //-     button.filter-btn.active All
-        //-     button.filter-btn Marquee
-        //-     button.filter-btn Banquet Hall
-        //-     button.filter-btn Conference Room
-        
+
+        div.filters-container
+            div.filter-bar
+                div.filter-item
+                    label Hall Name
+                    div.input-with-icon
+                        i.fas.fa-magnifying-glass
+                        input#filter-name(type="text" placeholder="Search by name...")
+                
+                div.filter-item
+                    label City
+                    div.input-with-icon
+                        i.fas.fa-city
+                        input#filter-city(type="text" placeholder="City")
+                
+                div.filter-item
+                    label Location
+                    div.input-with-icon
+                        i.fas.fa-location-dot
+                        input#filter-location(type="text" placeholder="Street/Area")
+                
+                div.filter-item
+                    label Hall Type
+                    div.input-with-icon
+                        i.fas.fa-building
+                        select#filter-type
+                            option(value="") All Types
+                            option(value="Marquee") Marquee
+                            option(value="Banquet Hall") Banquet Hall
+                            option(value="Conference Room") Conference Room
+                            option(value="Open Roof") Open Roof
+                            option(value="Other") Other
+                
+                button.btn-primary#apply-filters
+                    i.fas.fa-filter
+                    span Filter
+
         div#halls-grid.grid
             //- Data will be injected here via frontend.js
             div.loading-spinner(style="grid-column: 1 / -1; text-align: center; padding: 4rem 0; color: var(--text-secondary);")
@@ -56,4 +50,49 @@ block content
 
 block scripts
     script.
-        // The halls grid will be populated by frontend.js
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check for URL parameters to pre-fill filters
+            const urlParams = new URLSearchParams(window.location.search);
+            const city = urlParams.get('city');
+            const street = urlParams.get('street');
+            const name = urlParams.get('search');
+            const type = urlParams.get('type');
+
+            if (city) document.getElementById('filter-city').value = city;
+            if (street) document.getElementById('filter-location').value = street;
+            if (name) document.getElementById('filter-name').value = name;
+            if (type) document.getElementById('filter-type').value = type;
+
+            // Initial render call will be handled by frontend.js or triggered here
+            if (window.renderHallListing) {
+                const filters = {
+                    city: city || '',
+                    street: street || '',
+                    search: name || '',
+                    type: type || ''
+                };
+                window.renderHallListing(filters);
+            }
+
+            // Apply filters button
+            document.getElementById('apply-filters').addEventListener('click', () => {
+                const filters = {
+                    search: document.getElementById('filter-name').value.trim(),
+                    city: document.getElementById('filter-city').value.trim(),
+                    street: document.getElementById('filter-location').value.trim(),
+                    type: document.getElementById('filter-type').value
+                };
+                
+                if (window.renderHallListing) {
+                    window.renderHallListing(filters);
+                    
+                    // Update URL without refreshing for better UX
+                    const newUrl = new URL(window.location);
+                    Object.keys(filters).forEach(key => {
+                        if (filters[key]) newUrl.searchParams.set(key, filters[key]);
+                        else newUrl.searchParams.delete(key);
+                    });
+                    window.history.pushState({}, '', newUrl);
+                }
+            });
+        });

@@ -1,0 +1,193 @@
+extends layout
+
+block styles
+    style.
+        .hero {
+            position: relative;
+            background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), url('https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff;
+            margin: -2rem -3rem 0 -3rem; /* Compensate for content padding */
+        }
+        .hero-content {
+            max-width: 800px;
+            padding: 2rem;
+            z-index: 10;
+        }
+        .hero h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+        .search-container {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            padding: 1.5rem;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .search-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            position: relative;
+        }
+        .search-group label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-left: 1rem;
+        }
+        .search-input-wrapper {
+            width: 100%;
+            position: relative;
+        }
+        .search-input-wrapper i {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        .search-container input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 1rem 1.5rem 1rem 3rem;
+            border-radius: 12px;
+            color: #fff;
+            outline: none;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        .search-container input:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .search-container input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .search-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            height: 58px;
+            margin-top: 1.5rem;
+        }
+        .search-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+        }
+        .divider {
+            width: 1px;
+            height: 40px;
+            background: var(--border);
+            margin-top: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 3rem; }
+            .search-container { flex-direction: column; }
+            .divider { display: none; }
+            .search-btn { width: 100%; margin-top: 0.5rem; }
+        }
+
+block content
+    section.hero
+        div.hero-content
+            h1 Find Your Perfect Venue
+            p Discover and book the most exquisite halls for your weddings, corporate events, and special celebrations.
+            
+            div.search-container
+                div.search-group
+                    label City
+                    div.search-input-wrapper
+                        i.fas.fa-city
+                        input#search-city(type="text" placeholder="e.g. London")
+                
+                div.divider
+                
+                div.search-group
+                    label Location
+                    div.search-input-wrapper
+                        i.fas.fa-location-dot
+                        input#search-location(type="text" placeholder="e.g. Baker Street")
+                
+                button.search-btn#main-search-btn
+                    i.fas.fa-search
+                    span Search
+
+block scripts
+    script.
+        document.addEventListener('DOMContentLoaded', () => {
+            const cityInput = document.getElementById('search-city');
+            const locationInput = document.getElementById('search-location');
+            const searchBtn = document.getElementById('main-search-btn');
+
+            // Logic: One filter at a time
+            cityInput.addEventListener('input', () => {
+                if (cityInput.value.trim().length > 0) {
+                    locationInput.disabled = true;
+                    locationInput.value = '';
+                } else {
+                    locationInput.disabled = false;
+                }
+            });
+
+            locationInput.addEventListener('input', () => {
+                if (locationInput.value.trim().length > 0) {
+                    cityInput.disabled = true;
+                    cityInput.value = '';
+                } else {
+                    cityInput.disabled = false;
+                }
+            });
+
+            searchBtn.addEventListener('click', () => {
+                const city = cityInput.value.trim();
+                const location = locationInput.value.trim();
+                
+                let query = '';
+                if (city) query = `?city=${encodeURIComponent(city)}`;
+                else if (location) query = `?street=${encodeURIComponent(location)}`;
+                
+                window.location.href = `/halls${query}`;
+            });
+        });

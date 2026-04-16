@@ -74,7 +74,7 @@ class PublicService {
       const validOwners = await HallOwner.find({ is_public: true, is_verified: true }).select('_id').lean();
       const validOwnerIds = validOwners.map(owner => owner._id);
 
-      const { search, city, street, has_discount, min_price, max_price } = req.query;
+      const { search, city, street, type, has_discount, min_price, max_price } = req.query;
       const filter = {
         is_public: true,
         hall_owner_id: { $in: validOwnerIds }
@@ -83,6 +83,7 @@ class PublicService {
       if (search) filter.subhall_name = { $regex: search, $options: 'i' };
       if (city) filter['address.city'] = { $regex: city, $options: 'i' };
       if (street) filter['address.street_address'] = { $regex: street, $options: 'i' };
+      if (type) filter.type = type;
 
       if (has_discount === 'true') {
         filter.discount = { $ne: null };
@@ -158,12 +159,13 @@ class PublicService {
       const limit = parseInt(req.query.limit, 10) || 10;
       const skip = (page - 1) * limit;
 
-      const { search, city, street, has_discount, min_price, max_price } = req.query;
+      const { search, city, street, type, has_discount, min_price, max_price } = req.query;
       const filter = { hall_owner_id: owner_id, is_public: true };
 
       if (search) filter.subhall_name = { $regex: search, $options: 'i' };
       if (city) filter['address.city'] = { $regex: city, $options: 'i' };
       if (street) filter['address.street_address'] = { $regex: street, $options: 'i' };
+      if (type) filter.type = type;
 
       if (has_discount === 'true') {
         filter.discount = { $ne: null };

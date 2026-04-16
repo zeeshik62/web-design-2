@@ -557,3 +557,106 @@ td {
     border-color: #ef4444;
     background: rgba(239, 68, 68, 0.1);
 }
+
+/* Page Header & Filters */
+.page-header {
+    padding: 2rem 0 1.5rem;
+    text-align: center;
+}
+
+.page-header h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(to right, #fff, var(--primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.filters-container {
+    margin-bottom: 3rem;
+}
+
+.filter-bar {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 20px;
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-item {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-item label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-left: 0.5rem;
+}
+
+.input-with-icon {
+    position: relative;
+    width: 100%;
+}
+
+.input-with-icon i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.input-with-icon input, .input-with-icon select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border-radius: 12px;
+    color: white;
+    outline: none;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.input-with-icon select {
+    appearance: none;
+    cursor: pointer;
+}
+
+.input-with-icon input:focus, .input-with-icon select:focus {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#apply-filters {
+    height: 46px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0 2rem;
+}
+
+@media (max-width: 768px) {
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-item {
+        min-width: 100%;
+    }
+    #apply-filters {
+        width: 100%;
+        justify-content: center;
+    }
+}

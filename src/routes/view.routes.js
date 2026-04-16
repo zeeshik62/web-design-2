@@ -3,7 +3,7 @@ const path = require("path");
 
 // Public Views
 router.get("/", (req, res) => {
-    res.render("halls", { title: "Hall Listings" });
+    res.render("home", { title: "Welcome" });
 });
 
 router.get("/halls", (req, res) => {

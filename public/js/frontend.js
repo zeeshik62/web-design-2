@@ -12,10 +12,16 @@ const HMS = {
         alert(message);
     },
 
-    // Fetch all public subhalls
-    fetchPublicHalls: async () => {
+    // Fetch all public subhalls with optional filters
+    fetchPublicHalls: async (filters = {}) => {
         try {
-            const res = await fetch(`${API_BASE}/public/subhalls`);
+            const params = new URLSearchParams();
+            Object.keys(filters).forEach(key => {
+                if (filters[key]) params.append(key, filters[key]);
+            });
+            
+            const queryString = params.toString() ? `?${params.toString()}` : '';
+            const res = await fetch(`${API_BASE}/public/subhalls${queryString}`);
             const json = await res.json();
             return json.success ? json.data : [];
         } catch (err) {
@@ -308,8 +314,10 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
 
-    if (path === '/halls' || path === '/' || path === '/index') {
-        renderHallListing();
+    if (path === '/halls') {
+        // Handled by halls.pug script
+    } else if (path === '/' || path === '/index') {
+        // Home page logic
     } else if (path.startsWith('/halls/')) {
         renderHallDetail();
     } else if (path === '/owner/halls') {
@@ -317,11 +325,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-async function renderHallListing() {
+async function renderHallListing(filters = {}) {
     const grid = document.getElementById('halls-grid');
     if (!grid) return;
 
-    const halls = await HMS.fetchPublicHalls();
+    // Show loading state
+    grid.innerHTML = `
+        <div class="loading-spinner" style="grid-column: 1 / -1; text-align: center; padding: 4rem 0; color: var(--text-secondary);">
+            <i class="fas fa-circle-notch.fa-spin" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem; display: block;"></i>
+            <span>Refreshing venues...</span>
+        </div>
+    `;
+
+    const halls = await HMS.fetchPublicHalls(filters);
+    
+    if (halls.length === 0) {
+        grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 0; color: var(--text-secondary);">
+                <i class="fas fa-search-minus" style="font-size: 3rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+                <h3>No venues found</h3>
+                <p>Try adjusting your filters or search terms.</p>
+            </div>
+        `;
+        return;
+    }
+
     grid.innerHTML = halls.map(hall => `
         <div class="hall-card">
             <div class="hall-img">
@@ -338,12 +366,16 @@ async function renderHallListing() {
                     <span><i class="fas fa-car"></i> ${hall.parking_capacity} Spots</span>
                 </div>
                 <div class="hall-footer">
-                    <a href="/halls/${hall.slug}" class="btn btn-primary" style="width: 100%; text-align: center; text-decoration: none;">View Details</a>
+                    <div class="price">From Rs. ${hall.starting_price.toLocaleString()}</div>
+                    <a href="/halls/${hall.slug}" class="btn btn-primary" style="padding: 0.5rem 1rem; text-decoration: none; font-size: 0.85rem;">Details</a>
                 </div>
             </div>
         </div>
     `).join('');
 }
+
+// Expose to window for inline scripts
+window.renderHallListing = renderHallListing;
 
 async function renderHallDetail() {
     const slug = window.location.pathname.split('/').pop();
