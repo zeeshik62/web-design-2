@@ -325,7 +325,7 @@ async function renderHallListing() {
     grid.innerHTML = halls.map(hall => `
         <div class="hall-card">
             <div class="hall-img">
-                <img src="${API_BASE.replace('/api', '')}${hall.images && hall.images.length > 0 ? (hall.images[0].startsWith('/') ? hall.images[0] : '/' + hall.images[0]) : 'https://via.placeholder.com/400x250?text=No+Image'}" alt="${hall.subhall_name}">
+                <img src="${API_BASE.replace('/api', '')}${hall.images && hall.images.length > 0 ? (hall.images[0].startsWith('/') ? hall.images[0] :  hall.images[0]) : 'https://via.placeholder.com/400x250?text=No+Image'}" alt="${hall.subhall_name}">
             </div>
             <div class="hall-content">
                 <div class="hall-tags">

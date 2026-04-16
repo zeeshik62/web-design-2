@@ -105,7 +105,7 @@ class CustomerController {
   };
 
   register = async (req, res) => {
-        try {
+    try {
       const { name, email, password } = req.body;
       if (!name || !email || !password) {
         return res.status(400).json({ success: false, message: "Please provide name, email, and password" });
@@ -182,6 +182,51 @@ class CustomerController {
       return res.status(201).json({ success: true, message: "Query submitted successfully" });
     } catch (err) {
       return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  getRelatedCustomers = async (req, res) => {
+    try {
+      const ownerId = req.user.owner_id;
+      const { name, page = 1, limit = 10 } = req.query;
+
+      // 1. Find all subhalls owned by this owner
+      const subhalls = await SubHall.find({ hall_owner_id: ownerId });
+      const subhallIds = subhalls.map(sh => sh._id);
+
+      // 2. Get unique customer IDs who have made enquiries for these subhalls
+      const customerIds = await Enquiry.distinct("customer_id", { hall_id: { $in: subhallIds } });
+
+      const filter = { _id: { $in: customerIds } };
+      if (name) {
+        filter.name = { $regex: name, $options: "i" };
+      }
+
+      const pageNumber = parseInt(page, 10) || 1;
+      const pageSize = parseInt(limit, 10) || 10;
+      const skip = (pageNumber - 1) * pageSize;
+
+      const total = await Customer.countDocuments(filter);
+      const customers = await Customer.find(filter, "-password")
+        .sort({ name: 1 })
+        .skip(skip)
+        .limit(pageSize);
+
+      return res.status(200).json({
+        success: true,
+        data: customers,
+        pagination: {
+          total,
+          page: pageNumber,
+          limit: pageSize,
+          totalPages: Math.ceil(total / pageSize)
+        }
+      });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        message: err.message
+      });
     }
   }
 }
