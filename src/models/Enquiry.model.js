@@ -31,7 +31,7 @@ const QuerySchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "responded", "accepted", "rejected"],
+      enum: ["pending", "responded", "ignored"],
       default: "pending",
       index: true,
     },
