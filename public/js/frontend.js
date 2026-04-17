@@ -1,4 +1,4 @@
-/**
+docker/**
  * HMS Pro - Frontend Logic
  */
 
@@ -19,7 +19,7 @@ const HMS = {
             Object.keys(filters).forEach(key => {
                 if (filters[key]) params.append(key, filters[key]);
             });
-            
+
             const queryString = params.toString() ? `?${params.toString()}` : '';
             const res = await fetch(`${API_BASE}/public/subhalls${queryString}`);
             const json = await res.json();
@@ -56,7 +56,7 @@ const HMS = {
                 localStorage.setItem('hms_owner', JSON.stringify(json.data));
                 return { success: true };
             }
-            
+
             if (res.status === 403 || (json.message && json.message.includes("not verified"))) {
                 HMS.notify(json.message, 'warning');
                 return { success: false, needsVerification: true, email };
@@ -164,7 +164,7 @@ const HMS = {
         try {
             const res = await fetch(`${API_BASE}/hall_owner/subhalls`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -283,7 +283,7 @@ const HMS = {
         try {
             const res = await fetch(`${API_BASE}/customer/queries`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -338,7 +338,7 @@ async function renderHallListing(filters = {}) {
     `;
 
     const halls = await HMS.fetchPublicHalls(filters);
-    
+
     if (halls.length === 0) {
         grid.innerHTML = `
             <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 0; color: var(--text-secondary);">
@@ -354,7 +354,7 @@ async function renderHallListing(filters = {}) {
         <div class="hall-card">
             <div class="hall-img">
                 ${hall.discount ? `<div class="discount-badge">-${hall.discount}%</div>` : ''}
-                <img src="${API_BASE.replace('/api', '')}${hall.images && hall.images.length > 0 ? (hall.images[0].startsWith('/') ? hall.images[0] :  hall.images[0]) : 'https://via.placeholder.com/400x250?text=No+Image'}" alt="${hall.subhall_name}">
+                <img src="${API_BASE.replace('/api', '')}${hall.images && hall.images.length > 0 ? (hall.images[0].startsWith('/') ? hall.images[0] : hall.images[0]) : 'https://via.placeholder.com/400x250?text=No+Image'}" alt="${hall.subhall_name}">
             </div>
             <div class="hall-content">
                 <div class="hall-tags">
@@ -368,7 +368,7 @@ async function renderHallListing(filters = {}) {
                 </div>
                 <div class="hall-footer">
                     <div class="price">
-                        ${hall.discount ? `<span style="text-decoration: line-through; color: var(--text-secondary); font-size: 0.8rem; display: block;">Rs. ${(hall.starting_price * (1 + hall.discount/100)).toLocaleString()}</span>` : ''}
+                        ${hall.discount ? `<span style="text-decoration: line-through; color: var(--text-secondary); font-size: 0.8rem; display: block;">Rs. ${(hall.starting_price * (1 + hall.discount / 100)).toLocaleString()}</span>` : ''}
                         <span>From Rs. ${hall.starting_price.toLocaleString()}</span>
                     </div>
                     <a href="/halls/${hall.slug}" class="btn btn-primary" style="padding: 0.5rem 1rem; text-decoration: none; font-size: 0.85rem;">Details</a>
@@ -395,10 +395,10 @@ async function renderHallDetail() {
     // Populate the template placeholders (Pug will have the structure, we just fill data if needed via JS or keep it minimal)
     // Actually, for SEO/Pug, it's better if Pug renders the skeleton and we just enhance it, 
     // but if we want dynamic data from API, we do it here.
-    
+
     // For this implementation, I'll let Pug handle the initial render with empty/loading state 
     // and JS will populate it for better interactivity.
-    
+
     document.title = `${hall.subhall_name} | HMS`;
     // ... logic to fill the detail page elements ...
 }
