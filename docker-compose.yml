@@ -1,0 +1,27 @@
+services:
+  app:
+    build: .
+    container_name: hms_api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    # If you want to use a local Docker-based MongoDB instead of MongoDB Atlas, 
+    # uncomment the environment variables below and the mongo service.
+    # environment:
+    #   - MONGODB_URI=mongodb://mongo:27017/hms-dev
+    # depends_on:
+    #   - mongo
+
+  # mongo:
+  #   image: mongo:latest
+  #   container_name: hms_mongo
+  #   restart: unless-stopped
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongo_data:/data/db
+
+volumes:
+  mongo_data:
