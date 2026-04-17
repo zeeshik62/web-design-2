@@ -4,6 +4,22 @@ const SubHall = require('../models/SubHall.model');
 const Customer = require('../models/Customer.model');
 
 class HallOwnerService {
+    getProfile = async (req, res) => {
+        try {
+            const ownerId = req.user.owner_id;
+            const owner = await HallOwner.findById(ownerId).select("-password -otp");
+            
+            if (!owner) {
+                return res.status(404).json({ success: false, message: "Hall Owner not found" });
+            }
+
+            return res.status(200).json({ success: true, data: owner });
+        } catch (error) {
+            console.error("getProfile Error:", error);
+            return res.status(500).json({ success: false, message: error.message });
+        }
+    };
+
     getDashboardStats = async (req, res) => {
         try {
             const ownerId = req.user.owner_id;

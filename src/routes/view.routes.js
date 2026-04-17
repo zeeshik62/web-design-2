@@ -63,4 +63,8 @@ router.get("/owner/customers", (req, res) => {
     res.render("owner/customers", { title: "My Customers" });
 });
 
+router.get("/owner/profile", (req, res) => {
+    res.render("owner/profile", { title: "My Profile" });
+});
+
 module.exports = router;

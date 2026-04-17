@@ -267,6 +267,52 @@ const HMS = {
         }
     },
 
+    // Fetch Hall Owner Profile
+    fetchOwnerProfile: async () => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return null;
+
+        try {
+            const res = await fetch(`${API_BASE}/hall_owner/profile`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            return json.success ? json.data : null;
+        } catch (err) {
+            console.error('Error fetching profile:', err);
+            return null;
+        }
+    },
+
+    // Update Hall Owner Profile
+    updateOwnerProfile: async (profileData) => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return false;
+
+        try {
+            const res = await fetch(`${API_BASE}/hall_owner/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(profileData)
+            });
+            const json = await res.json();
+            if (json.success) {
+                // Update local storage if needed
+                localStorage.setItem('hms_owner', JSON.stringify(json.data));
+                HMS.notify('Profile updated successfully!');
+                return true;
+            }
+            HMS.notify(json.message || 'Failed to update profile', 'error');
+            return false;
+        } catch (err) {
+            console.error('Update profile error:', err);
+            return false;
+        }
+    },
+
     // Toggle Hall Public Status (Owner)
     toggleHallStatus: async (id) => {
         const token = localStorage.getItem('hms_token');
