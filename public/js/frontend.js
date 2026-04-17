@@ -1,4 +1,4 @@
-docker/**
+/**
  * HMS Pro - Frontend Logic
  */
 
@@ -200,6 +200,96 @@ const HMS = {
         }
     },
 
+    // Update Hall (Owner)
+    updateHall: async (id, hallData) => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return false;
+
+        try {
+            const res = await fetch(`${API_BASE}/hall_owner/subhalls/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(hallData)
+            });
+            const json = await res.json();
+            if (json.success) {
+                HMS.notify('Hall updated successfully!');
+                return true;
+            }
+            HMS.notify(json.message || 'Failed to update hall', 'error');
+            return false;
+        } catch (err) {
+            console.error('Update hall error:', err);
+            return false;
+        }
+    },
+
+    // Delete Hall (Owner)
+    deleteHall: async (id) => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return false;
+
+        try {
+            const res = await fetch(`${API_BASE}/hall_owner/subhalls/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            if (json.success) {
+                HMS.notify('Hall deleted successfully!');
+                return true;
+            }
+            HMS.notify(json.message || 'Failed to delete hall', 'error');
+            return false;
+        } catch (err) {
+            console.error('Delete hall error:', err);
+            return false;
+        }
+    },
+
+    // Fetch single Hall by ID (Owner)
+    fetchHallById: async (id) => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return null;
+
+        try {
+            const res = await fetch(`${API_BASE}/hall_owner/subhalls/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            return json.success ? json.data : null;
+        } catch (err) {
+            console.error('Error fetching hall by ID:', err);
+            return null;
+        }
+    },
+
+    // Toggle Hall Public Status (Owner)
+    toggleHallStatus: async (id) => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return false;
+
+        try {
+            const res = await fetch(`${API_BASE}/hall_owner/subhalls/${id}/toggle-public`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            if (json.success) {
+                HMS.notify(`Hall status updated successfully!`);
+                return true;
+            }
+            HMS.notify(json.message || 'Failed to toggle status', 'error');
+            return false;
+        } catch (err) {
+            console.error('Toggle status error:', err);
+            return false;
+        }
+    },
+
     logout: () => {
         localStorage.removeItem('hms_token');
         localStorage.removeItem('hms_owner');
@@ -320,8 +410,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Home page logic
     } else if (path.startsWith('/halls/')) {
         renderHallDetail();
-    } else if (path === '/owner/halls') {
-        renderOwnerHalls();
     }
 });
 
@@ -403,20 +491,4 @@ async function renderHallDetail() {
     // ... logic to fill the detail page elements ...
 }
 
-async function renderOwnerHalls() {
-    const tableBody = document.querySelector('#owner-halls-table tbody');
-    if (!tableBody) return;
 
-    const halls = await HMS.fetchOwnerHalls();
-    tableBody.innerHTML = halls.length ? halls.map(hall => `
-        <tr>
-            <td>${hall.subhall_name}</td>
-            <td>${hall.type}</td>
-            <td>${hall.sitting_capacity}</td>
-            <td>${hall.address.city}</td>
-            <td>
-                <button class="btn-icon" onclick="window.location.href='/halls/${hall.slug}'"><i class="fas fa-eye"></i></button>
-            </td>
-        </tr>
-    `).join('') : '<tr><td colspan="5">No halls found. Add your first one!</td></tr>';
-}

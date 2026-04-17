@@ -51,6 +51,10 @@ router.get("/owner/add-hall", (req, res) => {
     res.render("owner/add-hall", { title: "Add New Hall" });
 });
 
+router.get("/owner/edit-hall/:id", (req, res) => {
+    res.render("owner/edit-hall", { title: "Edit Hall" });
+});
+
 router.get("/owner/queries", (req, res) => {
     res.render("owner/queries", { title: "Manage Enquiries" });
 });

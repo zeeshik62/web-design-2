@@ -3,7 +3,7 @@ html(lang="en")
     head
         meta(charset="UTF-8")
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
-        title Add New Hall | HMS Pro
+        title Edit Hall | HMS Pro
         link(rel="preconnect" href="https://fonts.googleapis.com")
         link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
         link(href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet")
@@ -33,10 +33,10 @@ html(lang="en")
                 li(onclick="window.location.href='/owner/dashboard'")
                     i.fas.fa-chart-pie
                     span Dashboard
-                li(onclick="window.location.href='/owner/halls'")
+                li.active(onclick="window.location.href='/owner/halls'")
                     i.fas.fa-hotel
                     span My Halls
-                li.active(onclick="window.location.href='/owner/add-hall'")
+                li(onclick="window.location.href='/owner/add-hall'")
                     i.fas.fa-plus-circle
                     span Add Hall
                 li(onclick="window.location.href='/owner/queries'")
@@ -54,13 +54,13 @@ html(lang="en")
 
         main.content
             header
-                h1 Add New Hall
+                h1 Edit Hall
                 div.header-actions
                     button.btn.btn-primary#save-btn
                         i.fas.fa-save
-                        |  Save Hall
+                        |  Update Hall
             
-            form#add-hall-form
+            form#edit-hall-form
                 section.form-section
                     h2 Basic Information
                     div.form-grid
@@ -136,7 +136,7 @@ html(lang="en")
 
         script(src="/js/frontend.js")
         script.
-            // Check auth
+            const hallId = window.location.pathname.split('/').pop();
             const token = localStorage.getItem('hms_token');
             if (!token) window.location.href = '/owner/login';
 
@@ -145,12 +145,10 @@ html(lang="en")
             document.getElementById('owner-avatar').textContent = (owner.name || 'O').charAt(0).toUpperCase();
 
             // Menu tag management
-            const menus = { starter: [], main_course: [], drinks: [], desserts: [] };
+            let menus = { starter: [], main_course: [], drinks: [], desserts: [] };
 
             function setupMenuInput(id, category) {
                 const input = document.getElementById(id);
-                const container = document.getElementById(category + '-tags');
-                
                 input.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
@@ -166,7 +164,7 @@ html(lang="en")
 
             function renderTags(category) {
                 const container = document.getElementById(category + '-tags');
-                container.innerHTML = menus[category].map((item, index) => `
+                container.innerHTML = (menus[category] || []).map((item, index) => `
                     <span class="menu-tag">${item} <i class="fas fa-times" onclick="removeTag('${category}', ${index})"></i></span>
                 `).join('');
             }
@@ -180,6 +178,43 @@ html(lang="en")
             setupMenuInput('main-input', 'main_course');
             setupMenuInput('drinks-input', 'drinks');
             setupMenuInput('desserts-input', 'desserts');
+
+            // Load Hall Data
+            async function loadHallData() {
+                const hall = await HMS.fetchHallById(hallId);
+                if (!hall) {
+                    alert('Hall not found');
+                    window.location.href = '/owner/halls';
+                    return;
+                }
+
+                document.getElementById('hall_name').value = hall.subhall_name;
+                document.getElementById('type').value = hall.type;
+                document.getElementById('sitting_capacity').value = hall.sitting_capacity;
+                document.getElementById('parking_capacity').value = hall.parking_capacity;
+                document.getElementById('starting_price').value = hall.starting_price;
+                document.getElementById('discount').value = hall.discount || '';
+                document.getElementById('street_address').value = hall.address.street_address;
+                document.getElementById('city').value = hall.address.city;
+                document.getElementById('country').value = hall.address.country;
+                document.getElementById('instructions').value = hall.instructions || '';
+                document.getElementById('images').value = (hall.images || []).join('\n');
+
+                if (hall.menu) {
+                    menus = {
+                        starter: hall.menu.starter || [],
+                        main_course: hall.menu.main_course || [],
+                        drinks: hall.menu.drinks || [],
+                        desserts: hall.menu.desserts || []
+                    };
+                    renderTags('starter');
+                    renderTags('main_course');
+                    renderTags('drinks');
+                    renderTags('desserts');
+                }
+            }
+
+            loadHallData();
 
             // Submit handler
             document.getElementById('save-btn').addEventListener('click', async () => {
@@ -205,7 +240,7 @@ html(lang="en")
                     return;
                 }
 
-                const success = await HMS.createHall(hallData);
+                const success = await HMS.updateHall(hallId, hallData);
                 if (success) {
                     window.location.href = '/owner/halls';
                 }
