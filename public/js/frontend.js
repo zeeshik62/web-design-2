@@ -436,6 +436,157 @@ const HMS = {
             console.error('Query submission error:', err);
             return false;
         }
+    },
+
+    // VENDOR METHODS (Owner)
+    fetchOwnerVendors: async () => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return [];
+
+        try {
+            const res = await fetch(`${API_BASE}/hall_owner/vendors`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            return json.success ? json.data : [];
+        } catch (err) {
+            console.error('Error fetching vendors:', err);
+            return [];
+        }
+    },
+
+    fetchVendorById: async (id) => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return null;
+
+        try {
+            const res = await fetch(`${API_BASE}/hall_owner/vendors/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            return json.success ? json.data : null;
+        } catch (err) {
+            console.error('Error fetching vendor detail:', err);
+            return null;
+        }
+    },
+
+    createVendor: async (vendorData) => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return false;
+
+        try {
+            const res = await fetch(`${API_BASE}/hall_owner/vendors`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(vendorData)
+            });
+            const json = await res.json();
+            if (json.success) {
+                HMS.notify('Vendor Service added successfully!');
+                return true;
+            }
+            HMS.notify(json.message || 'Failed to add vendor', 'error');
+            return false;
+        } catch (err) {
+            console.error('Create vendor error:', err);
+            return false;
+        }
+    },
+
+    updateVendor: async (id, vendorData) => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return false;
+
+        try {
+            const res = await fetch(`${API_BASE}/hall_owner/vendors/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(vendorData)
+            });
+            const json = await res.json();
+            if (json.success) {
+                HMS.notify('Vendor Service updated successfully!');
+                return true;
+            }
+            HMS.notify(json.message || 'Failed to update vendor', 'error');
+            return false;
+        } catch (err) {
+            console.error('Update vendor error:', err);
+            return false;
+        }
+    },
+
+    deleteVendor: async (id) => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return false;
+
+        try {
+            const res = await fetch(`${API_BASE}/hall_owner/vendors/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            if (json.success) {
+                HMS.notify('Vendor Service deleted successfully!');
+                return true;
+            }
+            HMS.notify(json.message || 'Failed to delete vendor', 'error');
+            return false;
+        } catch (err) {
+            console.error('Delete vendor error:', err);
+            return false;
+        }
+    },
+
+    toggleVendorStatus: async (id) => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return false;
+
+        try {
+            const res = await fetch(`${API_BASE}/hall_owner/vendors/${id}/toggle-public`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const json = await res.json();
+            if (json.success) {
+                HMS.notify(`Vendor visibility updated!`);
+                return true;
+            }
+            HMS.notify(json.message || 'Failed to toggle vendor status', 'error');
+            return false;
+        } catch (err) {
+            console.error('Toggle vendor status error:', err);
+            return false;
+        }
+    },
+
+    // Image Upload Helper
+    uploadImage: async (file, type = 'vendor') => {
+        const token = localStorage.getItem('hms_token');
+        if (!token) return null;
+
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const res = await fetch(`${API_BASE}/hall_owner/upload/${type}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            const json = await res.json();
+            return json.success ? json.data.path : null;
+        } catch (err) {
+            console.error('Image upload error:', err);
+            return null;
+        }
     }
 };
 

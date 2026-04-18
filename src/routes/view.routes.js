@@ -67,4 +67,16 @@ router.get("/owner/profile", (req, res) => {
     res.render("owner/profile", { title: "My Profile" });
 });
 
+router.get("/owner/vendors", (req, res) => {
+    res.render("owner/vendors", { title: "Manage Vendor Services" });
+});
+
+router.get("/owner/add-vendor", (req, res) => {
+    res.render("owner/add-vendor", { title: "Add Vendor Service" });
+});
+
+router.get("/owner/edit-vendor/:id", (req, res) => {
+    res.render("owner/edit-vendor", { title: "Edit Vendor Service" });
+});
+
 module.exports = router;

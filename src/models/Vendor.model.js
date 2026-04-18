@@ -10,7 +10,7 @@ const VendorSchema = new mongoose.Schema({
   vendor_id: { type: mongoose.Schema.Types.ObjectId, ref: "HallOwner", required: true, index: true },
   vendor_name: { type: String, required: true, unique: true, trim: true },
   slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  category: { type: String, enum: ["Caterer", "Photographer", "Videographer", "Florist", "Decorator", "DJ", "Live Band", "Event Planner", "Make-up Artist", "Other"], required: true },
+  category: { type: String, enum: ["Caterer", "Photographer", "Decorator", "DJ", "Live Band", "Event Planner", "Make-up Artist"], required: true },
   address: { type: AddressSchema, required: true },
   images: [{ type: String }],
   staff: { type: String, enum: ["Male", "Female", "Both"], required: true },
