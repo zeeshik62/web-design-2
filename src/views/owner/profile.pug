@@ -30,6 +30,13 @@ html(lang="en")
             .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
             input:checked + .slider { background-color: var(--primary); }
             input:checked + .slider:before { transform: translateX(24px); }
+            
+            /* Upload Widget Styles */
+            .image-upload-wrapper { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.5rem; }
+            .upload-btn { width: 100%; height: 100px; border-radius: 12px; border: 2px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; color: var(--text-secondary); background: var(--bg-dark); }
+            .upload-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(99, 102, 241, 0.05); }
+            .upload-btn i { font-size: 1.5rem; margin-bottom: 0.5rem; }
+            .upload-btn.has-image { border-style: solid; border-color: var(--primary); }
     body
         nav.sidebar
             div.logo
@@ -102,8 +109,13 @@ html(lang="en")
                                 label Contact Number
                                 input.form-control#contact(type="text" required)
                             div.form-group.full-width
-                                label Profile Image URL
-                                input.form-control#image_url(type="url" placeholder="https://example.com/photo.jpg")
+                                label Profile Image
+                                div.image-upload-wrapper
+                                    div#upload-trigger.upload-btn
+                                        i.fas.fa-cloud-upload-alt
+                                        span#upload-text Click to Change Photo
+                                        input#file-input(type="file" accept="image/*" style="display: none;")
+                                p(style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.5rem;") Upload a professional photo or brand logo.
                             
                             div.form-group.full-width(style="margin-top: 1rem; margin-bottom: 0.5rem;")
                                 h3(style="font-size: 1.1rem; color: var(--primary);") Business Location
@@ -123,6 +135,8 @@ html(lang="en")
             const token = localStorage.getItem('hms_token');
             if (!token) window.location.href = '/owner/login';
 
+            let uploadedImage = '';
+
             async function initProfile() {
                 const owner = await HMS.fetchOwnerProfile();
                 if (!owner) return;
@@ -136,7 +150,7 @@ html(lang="en")
                 document.getElementById('brand_name').value = owner.brand_name;
                 document.getElementById('email').value = owner.email;
                 document.getElementById('contact').value = owner.contact;
-                document.getElementById('image_url').value = owner.image || '';
+                uploadedImage = owner.image || '';
                 document.getElementById('street_address').value = owner.address.street_address;
                 document.getElementById('city').value = owner.address.city;
                 document.getElementById('country').value = owner.address.country;
@@ -149,11 +163,15 @@ html(lang="en")
 
                 // Avatar Display
                 const avatar = document.getElementById('profile-avatar-display');
-                if (owner.image) {
-                    avatar.innerHTML = `<img src="${owner.image}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                if (uploadedImage) {
+                    avatar.innerHTML = `<img src="${uploadedImage}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
                     avatar.style.background = 'transparent';
+                    document.getElementById('upload-text').textContent = 'Change Photo';
                 } else {
                     avatar.textContent = owner.name.charAt(0).toUpperCase();
+                    avatar.style.background = 'var(--primary)';
+                    avatar.innerHTML = owner.name.charAt(0).toUpperCase();
+                    document.getElementById('upload-text').textContent = 'Upload Photo';
                 }
             }
 
@@ -162,6 +180,36 @@ html(lang="en")
                 label.textContent = isPublic ? 'Public' : 'Private';
                 label.className = `badge status ${isPublic ? 'approved' : 'pending'}`;
             }
+
+            // Image Upload Handling
+            const fileInput = document.getElementById('file-input');
+            const uploadTrigger = document.getElementById('upload-trigger');
+
+            uploadTrigger.onclick = () => fileInput.click();
+
+            fileInput.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                uploadTrigger.style.pointerEvents = 'none';
+                uploadTrigger.style.opacity = '0.7';
+                document.getElementById('upload-text').textContent = 'Uploading...';
+
+                const imagePath = await HMS.uploadImage(file, 'hall_owner_profile');
+
+                uploadTrigger.style.pointerEvents = 'auto';
+                uploadTrigger.style.opacity = '1';
+                document.getElementById('upload-text').textContent = 'Change Photo';
+
+                if (imagePath) {
+                    uploadedImage = imagePath;
+                    const avatar = document.getElementById('profile-avatar-display');
+                    avatar.innerHTML = `<img src="${imagePath}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                    avatar.style.background = 'transparent';
+                    HMS.notify('Image uploaded successfully!');
+                }
+                fileInput.value = '';
+            };
 
             document.getElementById('is_public').addEventListener('change', (e) => {
                 updateStatusLabel(e.target.checked);
@@ -172,7 +220,7 @@ html(lang="en")
                     name: document.getElementById('name').value,
                     brand_name: document.getElementById('brand_name').value,
                     contact: document.getElementById('contact').value,
-                    image: document.getElementById('image_url').value,
+                    image: uploadedImage,
                     is_public: document.getElementById('is_public').checked,
                     address: {
                         street_address: document.getElementById('street_address').value,
