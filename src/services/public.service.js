@@ -1,5 +1,6 @@
 const HallOwner = require("../models/HallOwner.model");
 const SubHall = require("../models/SubHall.model");
+const Vendor = require("../models/Vendor.model");
 
 class PublicService {
   // Get all hall owners (exclude sensitive data)
@@ -198,6 +199,145 @@ class PublicService {
       });
     } catch (err) {
       console.error("Public getSubHallsByOwnerId Error:", err);
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  };
+
+  // Get all vendors globally
+  getVendors = async (req, res) => {
+    try {
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const skip = (page - 1) * limit;
+
+      // Pre-fetch valid public/verified Hall Owner IDs to restrict Vendors globally
+      const validOwners = await HallOwner.find({ is_public: true, is_verified: true }).select('_id').lean();
+      const validOwnerIds = validOwners.map(owner => owner._id);
+
+      const { search, city, street, category, has_discount, min_price, max_price } = req.query;
+      const filter = {
+        is_public: true,
+        vendor_id: { $in: validOwnerIds }
+      };
+
+      if (search) filter.vendor_name = { $regex: search, $options: 'i' };
+      if (city) filter['address.city'] = { $regex: city, $options: 'i' };
+      if (street) filter['address.street_address'] = { $regex: street, $options: 'i' };
+      if (category) filter.category = category;
+
+      if (has_discount === 'true') {
+        filter.discount = { $ne: null };
+      } else if (has_discount === 'false') {
+        filter.discount = null;
+      }
+
+      if (min_price || max_price) {
+        filter.starting_price = {};
+        if (min_price) filter.starting_price.$gte = Number(min_price);
+        if (max_price) filter.starting_price.$lte = Number(max_price);
+      }
+
+      const vendors = await Vendor.find(filter)
+        .populate("vendor_id", "-password -otp")
+        .skip(skip)
+        .limit(limit);
+      const total = await Vendor.countDocuments(filter);
+
+      return res.status(200).json({
+        success: true,
+        data: vendors,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      });
+    } catch (err) {
+      console.error("Public getVendors Error:", err);
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  };
+
+  // Get single vendor strictly by slug
+  getVendorBySlug = async (req, res) => {
+    try {
+      const { slug } = req.params;
+
+      const validOwners = await HallOwner.find({ is_public: true, is_verified: true }).select('_id').lean();
+      const validOwnerIds = validOwners.map(owner => owner._id);
+
+      const vendor = await Vendor.findOne({
+        slug: slug.toLowerCase(),
+        is_public: true,
+        vendor_id: { $in: validOwnerIds }
+      }).populate("vendor_id", "-password -otp");
+
+      if (!vendor) {
+        return res.status(404).json({ success: false, message: "Vendor not found" });
+      }
+
+      return res.status(200).json({ success: true, data: vendor });
+    } catch (err) {
+      console.error("Public getVendorBySlug Error:", err);
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  };
+
+  // Get all public vendors for a specific hall owner
+  getVendorsByOwnerId = async (req, res) => {
+    try {
+      const { owner_id } = req.params;
+
+      // Ensure the directly requested owner is verified and public
+      const ownerCheck = await HallOwner.findOne({ _id: owner_id, is_public: true, is_verified: true }).select('_id').lean();
+      if (!ownerCheck) {
+        return res.status(404).json({ success: false, message: "Hall Owner not found, private, or unverified" });
+      }
+
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const skip = (page - 1) * limit;
+
+      const { search, city, street, category, has_discount, min_price, max_price } = req.query;
+      const filter = { vendor_id: owner_id, is_public: true };
+
+      if (search) filter.vendor_name = { $regex: search, $options: 'i' };
+      if (city) filter['address.city'] = { $regex: city, $options: 'i' };
+      if (street) filter['address.street_address'] = { $regex: street, $options: 'i' };
+      if (category) filter.category = category;
+
+      if (has_discount === 'true') {
+        filter.discount = { $ne: null };
+      } else if (has_discount === 'false') {
+        filter.discount = null;
+      }
+
+      if (min_price || max_price) {
+        filter.starting_price = {};
+        if (min_price) filter.starting_price.$gte = Number(min_price);
+        if (max_price) filter.starting_price.$lte = Number(max_price);
+      }
+
+      const vendors = await Vendor.find(filter)
+        .populate("vendor_id", "-password -otp")
+        .skip(skip)
+        .limit(limit);
+
+      const total = await Vendor.countDocuments(filter);
+
+      return res.status(200).json({
+        success: true,
+        data: vendors,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      });
+    } catch (err) {
+      console.error("Public getVendorsByOwnerId Error:", err);
       return res.status(500).json({ success: false, message: err.message });
     }
   };

@@ -10,4 +10,9 @@ router.get("/hall-owners/:owner_id/subhalls", publicService.getSubHallsByOwnerId
 router.get("/subhalls", publicService.getSubHalls);
 router.get("/subhalls/:slug", publicService.getSubHallBySlug);
 
+// Vendors Endpoints
+router.get("/hall-owners/:owner_id/vendors", publicService.getVendorsByOwnerId);
+router.get("/vendors", publicService.getVendors);
+router.get("/vendors/:slug", publicService.getVendorBySlug);
+
 module.exports = router;
