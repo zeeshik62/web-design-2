@@ -12,20 +12,121 @@ html(lang="en")
         style.
             body { display: flex; overflow: hidden; height: 100vh; }
             .content { flex-grow: 1; overflow-y: auto; padding: 2rem 3rem; }
-            .filters-bar { display: flex; gap: 1rem; margin-bottom: 2rem; background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); align-items: flex-end; }
-            .filter-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
-            .filter-group label { font-size: 0.85rem; font-weight: 600; color: #666; }
-            .filter-group input, .filter-group select { padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; }
-            .pagination { display: flex; gap: 0.5rem; justify-content: center; margin-top: 2rem; }
-            .page-btn { padding: 0.5rem 1rem; border: 1px solid #ddd; background: #fff; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
-            .page-btn.active { background: var(--primary-color, #4a90e2); color: #fff; border-color: var(--primary-color, #4a90e2); }
-            .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-            .status-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: capitalize; }
-            .status-pending { background: #fff3cd; color: #856404; }
-            .status-responded { background: #d4edda; color: #155724; }
-            .status-spam { background: #f8d7da; color: #721c24; }
-            .description-cell { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; color: #666; font-size: 0.9rem; }
-            .description-cell:hover { white-space: normal; color: #333; }
+
+            /* Tabs */
+            .tab-bar {
+                display: flex;
+                gap: 0.5rem;
+                margin-bottom: 2rem;
+                background: var(--card-bg);
+                padding: 0.5rem;
+                border-radius: 14px;
+                border: 1px solid var(--border);
+                width: fit-content;
+            }
+            .tab-btn {
+                padding: 0.6rem 1.75rem;
+                border-radius: 10px;
+                border: none;
+                background: transparent;
+                color: var(--text-secondary);
+                font-family: inherit;
+                font-size: 0.95rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.25s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .tab-btn.active {
+                background: var(--primary);
+                color: #fff;
+                box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+            }
+            .tab-btn:not(.active):hover {
+                background: rgba(99,102,241,0.08);
+                color: var(--text-primary);
+            }
+            .tab-content { display: none; }
+            .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+            /* Filters */
+            .filters-bar {
+                display: flex;
+                gap: 1rem;
+                margin-bottom: 2rem;
+                background: var(--card-bg);
+                padding: 1.5rem;
+                border-radius: 16px;
+                border: 1px solid var(--border);
+                align-items: flex-end;
+                flex-wrap: wrap;
+            }
+            .filter-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; min-width: 160px; }
+            .filter-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); }
+            .filter-group input, .filter-group select {
+                padding: 0.65rem 0.9rem;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                font-family: inherit;
+                font-size: 0.9rem;
+                background: var(--bg-dark);
+                color: var(--text-primary);
+                outline: none;
+                transition: border-color 0.2s;
+            }
+            .filter-group input:focus, .filter-group select:focus { border-color: var(--primary); }
+            .filter-group select option { background: var(--card-bg); }
+
+            /* Table */
+            .table-wrap { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; }
+            table { width: 100%; border-collapse: collapse; }
+            thead { background: rgba(99,102,241,0.06); }
+            th { text-align: left; padding: 1rem 1.25rem; color: var(--text-secondary); font-weight: 600; font-size: 0.85rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+            td { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+            tbody tr:last-child td { border-bottom: none; }
+            tbody tr { transition: background 0.15s; }
+            tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+            .status-badge { padding: 0.3rem 0.85rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.3px; }
+            .status-pending  { background: rgba(251,146,60,0.12); color: #fb923c; }
+            .status-responded { background: rgba(74,222,128,0.12); color: #4ade80; }
+            .status-spam     { background: rgba(239,68,68,0.12); color: #ef4444; }
+
+            .desc-cell { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); cursor: help; }
+            .status-select {
+                padding: 0.35rem 0.6rem;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                background: var(--bg-dark);
+                color: var(--text-primary);
+                font-family: inherit;
+                font-size: 0.82rem;
+                cursor: pointer;
+            }
+
+            /* Pagination */
+            .pagination { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1.5rem; }
+            .page-btn {
+                padding: 0.5rem 1rem;
+                border: 1px solid var(--border);
+                background: var(--card-bg);
+                color: var(--text-secondary);
+                border-radius: 8px;
+                cursor: pointer;
+                font-family: inherit;
+                transition: all 0.2s;
+            }
+            .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+            .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+            /* Empty state */
+            .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); }
+            .empty-state i { font-size: 2.5rem; margin-bottom: 1rem; display: block; opacity: 0.35; }
+
+            @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
     body
         nav.sidebar
             div.logo
@@ -53,38 +154,49 @@ html(lang="en")
                 li(onclick="window.location.href='/owner/profile'")
                     i.fas.fa-user-cog
                     span Profile
-            
+
             div.user-profile
                 div#owner-avatar.avatar AD
                 div.info
                     p#owner-name.name Loading...
                     p.role Hall Owner
-        
+
         main.content
             header
-                h1 Manage Enquiries
-                p Track and respond to user queries for your halls.
-            
-            div.filters-bar
-                div.filter-group
-                    label(for="customer_name") Customer Name
-                    input#filter-customer(type="text" placeholder="Search by name...")
-                div.filter-group
-                    label(for="status") Status
-                    select#filter-status
-                        option(value="") All Statuses
-                        option(value="pending") Pending
-                        option(value="responded") Responded
-                        option(value="spam") Spam
-                button.btn.btn-primary#btn-filter
-                    i.fas.fa-search
-                    |  Filter
-                button.btn.btn-outline#btn-reset
-                    | Reset
+                div
+                    h1 Manage Enquiries
+                    p(style="color: var(--text-secondary); margin-top: 0.25rem; font-size:0.95rem;") Track and respond to queries for your halls and vendors.
 
-            div.recent-card
-                div.table-container
-                    table#enquiries-table
+            //- Tab Bar
+            div.tab-bar
+                button.tab-btn.active#tab-halls-btn(onclick="switchTab('halls')")
+                    i.fas.fa-hotel
+                    span Hall Enquiries
+                button.tab-btn#tab-vendors-btn(onclick="switchTab('vendors')")
+                    i.fas.fa-handshake
+                    span Vendor Enquiries
+
+            //- ── HALL ENQUIRIES TAB ──
+            div#tab-halls.tab-content.active
+                div.filters-bar
+                    div.filter-group
+                        label Customer Name
+                        input#hall-filter-customer(type="text" placeholder="Search by name...")
+                    div.filter-group
+                        label Status
+                        select#hall-filter-status
+                            option(value="") All Statuses
+                            option(value="pending") Pending
+                            option(value="responded") Responded
+                            option(value="spam") Spam
+                    button.btn.btn-primary#hall-btn-filter(style="align-self:flex-end;")
+                        i.fas.fa-search
+                        |  Filter
+                    button.btn#hall-btn-reset(style="align-self:flex-end; background:var(--card-bg); border:1px solid var(--border); color:var(--text-secondary);")
+                        | Reset
+
+                div.table-wrap
+                    table
                         thead
                             tr
                                 th Customer
@@ -93,18 +205,54 @@ html(lang="en")
                                 th Description
                                 th Status
                                 th Action
-                        tbody
+                        tbody#hall-enquiries-body
                             tr
-                                td(colspan="5" style="text-align: center;") Loading enquiries...
+                                td(colspan="6" style="text-align:center; padding:2rem; color:var(--text-secondary);")
+                                    i.fas.fa-circle-notch.fa-spin(style="margin-right:0.5rem;")
+                                    | Loading...
 
-                div#pagination.pagination
+                div#hall-pagination.pagination
+
+            //- ── VENDOR ENQUIRIES TAB ──
+            div#tab-vendors.tab-content
+                div.filters-bar
+                    div.filter-group
+                        label Customer Name
+                        input#vendor-filter-customer(type="text" placeholder="Search by name...")
+                    div.filter-group
+                        label Status
+                        select#vendor-filter-status
+                            option(value="") All Statuses
+                            option(value="pending") Pending
+                            option(value="responded") Responded
+                            option(value="spam") Spam
+                    button.btn.btn-primary#vendor-btn-filter(style="align-self:flex-end;")
+                        i.fas.fa-search
+                        |  Filter
+                    button.btn#vendor-btn-reset(style="align-self:flex-end; background:var(--card-bg); border:1px solid var(--border); color:var(--text-secondary);")
+                        | Reset
+
+                div.table-wrap
+                    table
+                        thead
+                            tr
+                                th Customer
+                                th Vendor
+                                th Category
+                                th Date
+                                th Description
+                                th Status
+                                th Action
+                        tbody#vendor-enquiries-body
+                            tr
+                                td(colspan="7" style="text-align:center; padding:2rem; color:var(--text-secondary);")
+                                    i.fas.fa-circle-notch.fa-spin(style="margin-right:0.5rem;")
+                                    | Loading...
+
+                div#vendor-pagination.pagination
 
         script(src="/js/frontend.js")
         script.
-            let currentPage = 1;
-            const limit = 10;
-
-            // Check auth
             const token = localStorage.getItem('hms_token');
             if (!token) window.location.href = '/owner/login';
 
@@ -112,114 +260,206 @@ html(lang="en")
             document.getElementById('owner-name').textContent = owner.name || 'Owner';
             document.getElementById('owner-avatar').textContent = (owner.name || 'O').charAt(0).toUpperCase();
 
-            async function loadEnquiries(page = 1) {
-                currentPage = page;
-                const status = document.getElementById('filter-status').value;
-                const customerName = document.getElementById('filter-customer').value;
-                
-                let url = `/api/hall_owner/enquiries?page=${page}&limit=${limit}`;
-                if (status) url += `&status=${status}`;
+            /* ── TAB SWITCHING ── */
+            let activeTab = 'halls';
+            function switchTab(tab) {
+                activeTab = tab;
+                ['halls', 'vendors'].forEach(t => {
+                    document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+                    document.getElementById(`tab-${t}-btn`).classList.toggle('active', t === tab);
+                });
+                if (tab === 'halls' && hallPage === 0) loadHallEnquiries(1);
+                if (tab === 'vendors' && vendorPage === 0) loadVendorEnquiries(1);
+            }
+
+            /* ══════════════════════════════
+               HALL ENQUIRIES
+            ══════════════════════════════ */
+            let hallPage = 0;
+            const hallLimit = 10;
+
+            async function loadHallEnquiries(page = 1) {
+                hallPage = page;
+                const status       = document.getElementById('hall-filter-status').value;
+                const customerName = document.getElementById('hall-filter-customer').value;
+
+                let url = `/api/hall_owner/enquiries?page=${page}&limit=${hallLimit}`;
+                if (status)       url += `&status=${encodeURIComponent(status)}`;
                 if (customerName) url += `&customer_name=${encodeURIComponent(customerName)}`;
 
-                try {
-                    const response = await fetch(url, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const result = await response.json();
+                const tbody = document.getElementById('hall-enquiries-body');
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-secondary);"><i class="fas fa-circle-notch fa-spin" style="margin-right:0.5rem;"></i>Loading...</td></tr>`;
 
-                    if (result.success) {
-                        displayEnquiries(result.data);
-                        setupPagination(result.pagination);
+                try {
+                    const res  = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const data = await res.json();
+                    if (data.success) {
+                        renderHallRows(data.data);
+                        renderPagination('hall', data.pagination);
                     } else {
-                        alert('Error: ' + result.message);
+                        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem;">${data.message}</td></tr>`;
                     }
                 } catch (err) {
-                    console.error('Fetch error:', err);
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#ef4444;">Failed to load enquiries.</td></tr>`;
                 }
             }
 
-            function displayEnquiries(enquiries) {
-                const tbody = document.querySelector('#enquiries-table tbody');
+            function renderHallRows(enquiries) {
+                const tbody = document.getElementById('hall-enquiries-body');
                 if (!enquiries.length) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No enquiries found.</td></tr>';
+                    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>No hall enquiries found.</p></div></td></tr>`;
                     return;
                 }
-
                 tbody.innerHTML = enquiries.map(enq => `
                     <tr>
                         <td>
-                            <div style="display: flex; flex-direction: column;">
+                            <div style="display:flex; flex-direction:column; gap:0.15rem;">
                                 <strong>${enq.customer_id ? enq.customer_id.name : 'Unknown'}</strong>
-                                <small style="color: #666;">${enq.customer_id ? enq.customer_id.email : '-'}</small>
+                                <small style="color:var(--text-secondary);">${enq.customer_id ? enq.customer_id.email : '-'}</small>
                             </div>
                         </td>
-                        <td>${enq.hall_id ? enq.hall_id.subhall_name : 'Deleted Venue'}</td>
-                        <td>${new Date(enq.date).toLocaleDateString()}</td>
+                        <td style="color:var(--accent-blue);">${enq.hall_id ? enq.hall_id.subhall_name : '<em style="color:var(--text-secondary)">Deleted</em>'}</td>
+                        <td style="white-space:nowrap;">${new Date(enq.date).toLocaleDateString('en-GB')}</td>
+                        <td><div class="desc-cell" title="${enq.description || ''}">${enq.description || '—'}</div></td>
+                        <td><span class="status-badge status-${enq.status}">${enq.status}</span></td>
                         <td>
-                            <div class="description-cell" title="${enq.description || ''}">${enq.description || 'No description'}</div>
-                        </td>
-                        <td>
-                            <span class="status-badge status-${enq.status}">${enq.status}</span>
-                        </td>
-                        <td>
-                            <select onchange="updateStatus('${enq._id}', this.value)" style="padding: 0.3rem; border-radius: 4px;">
-                                <option value="pending" ${enq.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                <option value="responded" ${enq.status === 'responded' ? 'selected' : ''}>Responded</option>
-                                <option value="spam" ${enq.status === 'spam' ? 'selected' : ''}>Spam</option>
+                            <select class="status-select" onchange="updateHallStatus('${enq._id}', this.value)">
+                                <option value="pending"   ${enq.status==='pending'   ? 'selected':''}>Pending</option>
+                                <option value="responded" ${enq.status==='responded' ? 'selected':''}>Responded</option>
+                                <option value="spam"      ${enq.status==='spam'      ? 'selected':''}>Spam</option>
                             </select>
                         </td>
                     </tr>
                 `).join('');
             }
 
-            async function updateStatus(id, newStatus) {
+            async function updateHallStatus(id, status) {
+                const res  = await fetch(`/api/hall_owner/enquiries/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ status })
+                });
+                const data = await res.json();
+                if (data.success) loadHallEnquiries(hallPage);
+            }
+
+            /* ══════════════════════════════
+               VENDOR ENQUIRIES
+            ══════════════════════════════ */
+            let vendorPage = 0;
+            const vendorLimit = 10;
+
+            async function loadVendorEnquiries(page = 1) {
+                vendorPage = page;
+                const status       = document.getElementById('vendor-filter-status').value;
+                const customerName = document.getElementById('vendor-filter-customer').value;
+
+                let url = `/api/hall_owner/vendor-enquiries?page=${page}&limit=${vendorLimit}`;
+                if (status)       url += `&status=${encodeURIComponent(status)}`;
+                if (customerName) url += `&customer_name=${encodeURIComponent(customerName)}`;
+
+                const tbody = document.getElementById('vendor-enquiries-body');
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--text-secondary);"><i class="fas fa-circle-notch fa-spin" style="margin-right:0.5rem;"></i>Loading...</td></tr>`;
+
                 try {
-                    const response = await fetch(`/api/hall_owner/enquiries/${id}/status`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ status: newStatus })
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        loadEnquiries(currentPage);
+                    const res  = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const data = await res.json();
+                    if (data.success) {
+                        renderVendorRows(data.data);
+                        renderPagination('vendor', data.pagination);
                     } else {
-                        alert('Failed to update status: ' + result.message);
+                        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem;">${data.message}</td></tr>`;
                     }
                 } catch (err) {
-                    console.error('Update error:', err);
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#ef4444;">Failed to load vendor enquiries.</td></tr>`;
                 }
             }
 
-            function setupPagination(meta) {
-                const container = document.getElementById('pagination');
-                if (meta.totalPages <= 1) {
-                    container.innerHTML = '';
+            function renderVendorRows(queries) {
+                const tbody = document.getElementById('vendor-enquiries-body');
+                if (!queries.length) {
+                    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fas fa-handshake-slash"></i><p>No vendor enquiries found.</p></div></td></tr>`;
                     return;
                 }
+                tbody.innerHTML = queries.map(q => `
+                    <tr>
+                        <td>
+                            <div style="display:flex; flex-direction:column; gap:0.15rem;">
+                                <strong>${q.customer_id ? q.customer_id.name : 'Unknown'}</strong>
+                                <small style="color:var(--text-secondary);">${q.customer_id ? q.customer_id.email : '-'}</small>
+                            </div>
+                        </td>
+                        <td style="color:var(--accent-purple);">${q.vendor_id ? q.vendor_id.vendor_name : '<em style="color:var(--text-secondary)">Deleted</em>'}</td>
+                        <td>
+                            ${q.vendor_id ? `<span style="padding:0.2rem 0.65rem; background:rgba(99,102,241,0.1); color:var(--primary); border-radius:20px; font-size:0.78rem; font-weight:600;">${q.vendor_id.category}</span>` : '—'}
+                        </td>
+                        <td style="white-space:nowrap;">${new Date(q.date).toLocaleDateString('en-GB')}</td>
+                        <td><div class="desc-cell" title="${q.description || ''}">${q.description || '—'}</div></td>
+                        <td><span class="status-badge status-${q.status}">${q.status}</span></td>
+                        <td>
+                            <select class="status-select" onchange="updateVendorStatus('${q._id}', this.value)">
+                                <option value="pending"   ${q.status==='pending'   ? 'selected':''}>Pending</option>
+                                <option value="responded" ${q.status==='responded' ? 'selected':''}>Responded</option>
+                                <option value="spam"      ${q.status==='spam'      ? 'selected':''}>Spam</option>
+                            </select>
+                        </td>
+                    </tr>
+                `).join('');
+            }
 
-                let html = `
-                    <button class="page-btn" ${meta.page === 1 ? 'disabled' : ''} onclick="loadEnquiries(${meta.page - 1})">Prev</button>
-                `;
+            async function updateVendorStatus(id, status) {
+                const res  = await fetch(`/api/hall_owner/vendor-enquiries/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ status })
+                });
+                const data = await res.json();
+                if (data.success) loadVendorEnquiries(vendorPage);
+            }
 
+            /* ── SHARED PAGINATION ── */
+            function renderPagination(type, meta) {
+                const container = document.getElementById(`${type}-pagination`);
+                if (!meta || meta.totalPages <= 1) { container.innerHTML = ''; return; }
+
+                const loadFn = type === 'halls' ? 'loadHallEnquiries' : 'loadVendorEnquiries';
+                let html = `<button class="page-btn" ${meta.page === 1 ? 'disabled' : ''} onclick="${loadFn}(${meta.page - 1})">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>`;
                 for (let i = 1; i <= meta.totalPages; i++) {
-                    html += `<button class="page-btn ${meta.page === i ? 'active' : ''}" onclick="loadEnquiries(${i})">${i}</button>`;
+                    html += `<button class="page-btn ${meta.page === i ? 'active' : ''}" onclick="${loadFn}(${i})">${i}</button>`;
                 }
-
-                html += `
-                    <button class="page-btn" ${meta.page === meta.totalPages ? 'disabled' : ''} onclick="loadEnquiries(${meta.page + 1})">Next</button>
-                `;
-
+                html += `<button class="page-btn" ${meta.page === meta.totalPages ? 'disabled' : ''} onclick="${loadFn}(${meta.page + 1})">
+                             <i class="fas fa-chevron-right"></i>
+                         </button>`;
                 container.innerHTML = html;
             }
 
-            document.getElementById('btn-filter').addEventListener('click', () => loadEnquiries(1));
-            document.getElementById('btn-reset').addEventListener('click', () => {
-                document.getElementById('filter-customer').value = '';
-                document.getElementById('filter-status').value = '';
-                loadEnquiries(1);
+            /* ── EVENT BINDINGS ── */
+            document.getElementById('hall-btn-filter').addEventListener('click', () => loadHallEnquiries(1));
+            document.getElementById('hall-btn-reset').addEventListener('click', () => {
+                document.getElementById('hall-filter-customer').value = '';
+                document.getElementById('hall-filter-status').value   = '';
+                loadHallEnquiries(1);
             });
 
-            loadEnquiries();
+            document.getElementById('vendor-btn-filter').addEventListener('click', () => loadVendorEnquiries(1));
+            document.getElementById('vendor-btn-reset').addEventListener('click', () => {
+                document.getElementById('vendor-filter-customer').value = '';
+                document.getElementById('vendor-filter-status').value   = '';
+                loadVendorEnquiries(1);
+            });
+
+            // Allow Enter key in filter inputs
+            ['hall-filter-customer','vendor-filter-customer'].forEach(id => {
+                document.getElementById(id).addEventListener('keydown', e => {
+                    if (e.key === 'Enter') {
+                        id.startsWith('hall') ? loadHallEnquiries(1) : loadVendorEnquiries(1);
+                    }
+                });
+            });
+
+            // Check URL param to open on correct tab
+            const urlTab = new URLSearchParams(window.location.search).get('tab');
+            if (urlTab === 'vendors') switchTab('vendors');
+            else loadHallEnquiries(1);

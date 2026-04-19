@@ -238,6 +238,22 @@ block content
                 p(style="margin-top: 1rem; text-align: center; color: var(--text-secondary);") Already have an account?
                     a(href="#" onclick="switchAuthMode()" style="color: var(--primary); text-decoration: none;") &nbsp;Login
 
+    //- Vendor Query Modal
+    div#query-modal.modal-overlay
+        div.modal
+            span.close-btn(onclick="closeModal('query-modal')") &times;
+            h2(style="margin-bottom: 0.5rem;") Send an Enquiry
+            p(style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;") Tell the vendor about your requirements.
+            form#vendor-query-form
+                input#query-vendor-slug(type="hidden")
+                div(style="margin-bottom: 1rem;")
+                    label Event / Service Date
+                    input(type="date" name="date" required)
+                div(style="margin-bottom: 1.5rem;")
+                    label Describe your requirements
+                    textarea(name="description" rows="4" placeholder="e.g. Number of guests, occasion type, preferences..." required)
+                button.btn.btn-primary(type="submit" style="width: 100%") Submit Enquiry
+
     div#vendor-detail-container.container
         div.loading-spinner(style="text-align: center; padding: 6rem 0;")
             i.fas.fa-circle-notch.fa-spin(style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem; display: block;")
@@ -339,7 +355,7 @@ block scripts
                         </div>
 
                         <div class="action-btns">
-                            <button class="btn btn-primary" onclick="handleContactClick()">
+                            <button class="btn btn-primary" onclick="handleContactClick('${vendor.slug}')">
                                 <i class="fas fa-envelope"></i> Send Enquiry
                             </button>
                             ${vendor.vendor_id && vendor.vendor_id.contact ? `
@@ -395,15 +411,27 @@ block scripts
         function checkAuth() {
             return !!localStorage.getItem('hms_customer_token');
         }
-        function handleContactClick() {
+        function handleContactClick(slug) {
             if (!checkAuth()) { openModal('auth-modal'); return; }
-            HMS.notify('Enquiry feature coming soon!', 'info');
+            document.getElementById('query-vendor-slug').value = slug;
+            openModal('query-modal');
         }
         function handleWhatsAppClick(contact) {
             if (!checkAuth()) { openModal('auth-modal'); return; }
             const clean = contact.replace(/\D/g, '');
             window.open(`https://wa.me/${clean}`, '_blank');
         }
+
+        document.getElementById('vendor-query-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            data.vendor_slug = document.getElementById('query-vendor-slug').value;
+            const ok = await HMS.submitVendorQuery(data);
+            if (ok) {
+                closeModal('query-modal');
+                e.target.reset();
+            }
+        };
 
         document.getElementById('customer-login-form').onsubmit = async (e) => {
             e.preventDefault();

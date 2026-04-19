@@ -582,6 +582,32 @@ const HMS = {
         }
     },
 
+    submitVendorQuery: async (queryData) => {
+        const token = localStorage.getItem('hms_customer_token');
+        if (!token) return false;
+
+        try {
+            const res = await fetch(`${API_BASE}/customer/vendor-queries`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(queryData)
+            });
+            const json = await res.json();
+            if (json.success) {
+                HMS.notify('Vendor query submitted successfully!');
+                return true;
+            }
+            HMS.notify(json.message || 'Failed to submit vendor query', 'error');
+            return false;
+        } catch (err) {
+            console.error('Vendor query submission error:', err);
+            return false;
+        }
+    },
+
     // --- UI HELPERS ---
     renderUserNavbar: () => {
         const guestLinks = document.getElementById('guest-links');

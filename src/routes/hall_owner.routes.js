@@ -3,6 +3,7 @@ const enquiryService = require("../services/enquiry.service");
 const customerService = require("../services/customer.service");
 const subHallService = require("../services/subhall.service");
 const vendorService = require("../services/vendor.service");
+const vendorQueryService = require("../services/vendor_query.service");
 const hallOwnerService = require("../services/hall_owner.service");
 const formQueryService = require("../services/form_query.service");
 const authMiddleware = require("../middlewares/auth.middleware");
@@ -20,9 +21,13 @@ router.get("/queries-form", formQueryService.getQueries);
 router.patch("/query-form/:id/status", formQueryService.updateStatus);
 router.delete("/query-form/:id", formQueryService.deleteQuery);
 
-// Hall Owner Enquiries (User Queries)
+// Hall Owner Enquiries (Hall Queries)
 router.get("/enquiries", enquiryService.getOwnerEnquiries);
 router.patch("/enquiries/:id/status", enquiryService.updateEnquiryStatus);
+
+// Hall Owner Vendor Enquiries (Vendor Queries)
+router.get("/vendor-enquiries", vendorQueryService.getOwnerVendorQueries);
+router.patch("/vendor-enquiries/:id/status", vendorQueryService.updateVendorQueryStatus);
 
 // Hall Owner Related Customers
 router.get("/customers", customerService.getRelatedCustomers);
