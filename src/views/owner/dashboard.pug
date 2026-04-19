@@ -65,35 +65,40 @@ html(lang="en")
                         p#total-halls.count 0
                 div.stat-card
                     div.stat-icon.purple
-                        i.fas.fa-envelope-open-text
+                        i.fas.fa-handshake
                     div.stat-info
-                        h3 New Enquiries
-                        p#total-enquiries.count 0
+                        h3 Total Vendors
+                        p#total-vendors.count 0
                 div.stat-card
                     div.stat-icon.orange
+                        i.fas.fa-envelope-open-text
+                    div.stat-info
+                        h3 Global Enquiries
+                        p#total-enquiries.count 0
+                div.stat-card
+                    div.stat-icon.blue(style="background: rgba(34, 197, 94, 0.1); color: #22c55e;")
                         i.fas.fa-users
                     div.stat-info
                         h3 Total Customers
                         p#total-customers.count 0
 
             div.recent-card
-                h2 Recent Activity
+                div(style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;")
+                    h2 Recent Enquiries
+                    a(href="/owner/queries" style="color: var(--primary); text-decoration: none; font-size: 0.9rem; font-weight: 600;") View All
                 div.table-container
                     table
                         thead
                             tr
-                                th Event
+                                th Type
+                                th Details
                                 th Date
                                 th Status
                         tbody
                             tr
-                                td New Hall "Grand Ballroom" added
-                                td 2026-04-12
-                                td: span.status.approved Completed
-                            tr
-                                td Enquiry received for "Oceanic Marquee"
-                                td 2026-04-13
-                                td: span.status.pending Pending
+                                td(colspan="4" style="text-align: center; padding: 2rem;")
+                                    i.fas.fa-circle-notch.fa-spin(style="margin-right: 0.5rem;")
+                                    | Loading...
 
         script(src="/js/frontend.js")
         script.
@@ -113,7 +118,8 @@ html(lang="en")
                     const result = await response.json();
                     if (result.success) {
                         document.getElementById('total-halls').textContent = result.data.totalHalls;
-                        document.getElementById('total-enquiries').textContent = result.data.totalEnquiries;
+                        document.getElementById('total-vendors').textContent = result.data.totalVendors;
+                        document.getElementById('total-enquiries').textContent = result.data.combinedEnquiries;
                         document.getElementById('total-customers').textContent = result.data.totalCustomers;
                     }
                 } catch (err) {
@@ -121,30 +127,65 @@ html(lang="en")
                 }
             }
 
-            async function loadPendingEnquiries() {
+            async function loadRecentEnquiries() {
                 const tbody = document.querySelector('table tbody');
                 try {
-                    const response = await fetch('/api/hall_owner/enquiries?status=pending&limit=5', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const result = await response.json();
+                    // Fetch both hall and vendor enquiries
+                    const [hRes, vRes] = await Promise.all([
+                        fetch('/api/hall_owner/enquiries?status=pending&limit=3', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        }),
+                        fetch('/api/hall_owner/vendor-enquiries?status=pending&limit=3', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        })
+                    ]);
+
+                    const hData = await hRes.json();
+                    const vData = await vRes.json();
+
+                    let combined = [];
+                    if (hData.success) {
+                        combined = combined.concat(hData.data.map(enq => ({
+                            type: 'Hall',
+                            detail: `Enquiry from "${enq.customer_id?.name || 'User'}" for "${enq.hall_id?.subhall_name || 'Hall'}"`,
+                            date: enq.date,
+                            status: enq.status
+                        })));
+                    }
+                    if (vData.success) {
+                        combined = combined.concat(vData.data.map(q => ({
+                            type: 'Vendor',
+                            detail: `Enquiry from "${q.customer_id?.name || 'User'}" for "${q.vendor_id?.vendor_name || 'Vendor'}"`,
+                            date: q.date,
+                            status: q.status
+                        })));
+                    }
+
+                    // Sort by newest
+                    combined.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    const latest = combined.slice(0, 5);
                     
-                    if (result.success && result.data.length > 0) {
-                        tbody.innerHTML = result.data.map(enq => `
+                    if (latest.length > 0) {
+                        tbody.innerHTML = latest.map(item => `
                             <tr>
-                                <td>Enquiry from "${enq.customer_id ? enq.customer_id.name : 'User'}" for "${enq.hall_id ? enq.hall_id.subhall_name : 'Hall'}"</td>
-                                <td>${new Date(enq.date).toLocaleDateString()}</td>
-                                <td><span class="status-pending status">Pending</span></td>
+                                <td>
+                                    <span style="padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; background: ${item.type === 'Hall' ? 'rgba(99, 102, 241, 0.1)' : 'rgba(168, 85, 247, 0.1)'}; color: ${item.type === 'Hall' ? 'var(--primary)' : 'var(--accent-purple)'};">
+                                        ${item.type}
+                                    </span>
+                                </td>
+                                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.detail}</td>
+                                <td style="white-space: nowrap;">${new Date(item.date).toLocaleDateString()}</td>
+                                <td><span class="status-pending status">${item.status}</span></td>
                             </tr>
                         `).join('');
                     } else {
-                        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No pending enquiries at the moment.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem;">No new enquiries.</td></tr>';
                     }
                 } catch (err) {
                     console.error('Error loading enquiries:', err);
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Error loading data.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #ef4444; padding: 2rem;">Error loading data.</td></tr>';
                 }
             }
 
             loadStats();
-            loadPendingEnquiries();
+            loadRecentEnquiries();

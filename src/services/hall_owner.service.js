@@ -23,25 +23,43 @@ class HallOwnerService {
     getDashboardStats = async (req, res) => {
         try {
             const ownerId = req.user.owner_id;
+            const Vendor = require('../models/Vendor.model');
+            const VendorQuery = require('../models/VendorQuery.model');
 
-            // 1. Get SubHalls count
+            // 1. Get SubHalls stats
             const subhalls = await SubHall.find({ hall_owner_id: ownerId }).select('_id');
             const subhallIds = subhalls.map(sh => sh._id);
             const totalHalls = subhalls.length;
 
-            // 2. Get Enquiries count for these halls
-            const totalEnquiries = await Enquiry.countDocuments({ hall_id: { $in: subhallIds } });
+            // 2. Get Vendors stats
+            const vendors = await Vendor.find({ owner_id: ownerId }).select('_id');
+            const vendorIds = vendors.map(v => v._id);
+            const totalVendors = vendors.length;
+
+            // 3. Get Enquiries counts
+            const totalHallEnquiries = await Enquiry.countDocuments({ hall_id: { $in: subhallIds } });
+            const totalVendorEnquiries = await VendorQuery.countDocuments({ vendor_id: { $in: vendorIds } });
             
-            // 3. Get unique Customers count (who have made enquiries)
-            const uniqueCustomers = await Enquiry.distinct("customer_id", { hall_id: { $in: subhallIds } });
-            const totalCustomers = uniqueCustomers.length;
+            // 4. Get unique Customers count (who have made enquiries for either halls or vendors)
+            const customersFromHalls = await Enquiry.distinct("customer_id", { hall_id: { $in: subhallIds } });
+            const customersFromVendors = await VendorQuery.distinct("customer_id", { vendor_id: { $in: vendorIds } });
+            
+            // Combine and unique-ify
+            const allCustomerIds = [...new Set([
+                ...customersFromHalls.map(id => id.toString()), 
+                ...customersFromVendors.map(id => id.toString())
+            ])];
+            const totalCustomers = allCustomerIds.length;
 
             return res.status(200).json({
                 success: true,
                 data: {
                     totalHalls,
-                    totalEnquiries,
-                    totalCustomers
+                    totalVendors,
+                    totalHallEnquiries,
+                    totalVendorEnquiries,
+                    totalCustomers,
+                    combinedEnquiries: totalHallEnquiries + totalVendorEnquiries
                 }
             });
         } catch (error) {

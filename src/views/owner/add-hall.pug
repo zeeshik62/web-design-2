@@ -24,6 +24,13 @@ html(lang="en")
             .tag-container { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
             .menu-tag { background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; }
             .menu-tag i { cursor: pointer; }
+            .image-upload-wrapper { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+            .image-preview { width: 120px; height: 120px; border-radius: 12px; border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+            .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+            .image-preview .remove-img { position: absolute; top: 5px; right: 5px; background: rgba(239, 68, 68, 0.8); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; }
+            .upload-btn { width: 120px; height: 120px; border-radius: 12px; border: 2px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; color: var(--text-secondary); }
+            .upload-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(99, 102, 241, 0.05); }
+            .upload-btn i { font-size: 1.5rem; margin-bottom: 0.5rem; }
     body
         nav.sidebar
             div.logo
@@ -137,8 +144,13 @@ html(lang="en")
                         label Instructions & Policies
                         textarea.form-control#instructions(rows="4" placeholder="Mention any specific rules or information for customers...")
                     div.form-group(style="margin-top: 1.5rem;")
-                        label Images (URLs, one per line)
-                        textarea.form-control#images(rows="3" placeholder="https://example.com/image1.jpg")
+                        label Hall Images
+                        div.image-upload-wrapper#image-wrapper
+                            div.upload-btn#upload-trigger
+                                i.fas.fa-cloud-upload-alt
+                                span Upload
+                                input#file-input(type="file" accept="image/*" style="display: none;")
+                        p(style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.5rem;") Upload high-quality photos of your hall. Click to add more.
 
         script(src="/js/frontend.js")
         script.
@@ -187,8 +199,54 @@ html(lang="en")
             setupMenuInput('drinks-input', 'drinks');
             setupMenuInput('desserts-input', 'desserts');
 
+            // Image upload
+            let uploadedImages = [];
+            const fileInput    = document.getElementById('file-input');
+            const uploadTrigger = document.getElementById('upload-trigger');
+            const imageWrapper  = document.getElementById('image-wrapper');
+
+            uploadTrigger.onclick = () => fileInput.click();
+
+            fileInput.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                uploadTrigger.style.pointerEvents = 'none';
+                uploadTrigger.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Uploading...</span>';
+
+                const imagePath = await HMS.uploadImage(file, 'subhall');
+
+                uploadTrigger.style.pointerEvents = 'auto';
+                uploadTrigger.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><span>Upload</span>';
+
+                if (imagePath) {
+                    uploadedImages.push(imagePath);
+                    renderPreviews();
+                }
+                fileInput.value = '';
+            };
+
+            function renderPreviews() {
+                document.querySelectorAll('.image-preview').forEach(el => el.remove());
+                uploadedImages.forEach((path, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'image-preview';
+                    div.innerHTML = `
+                        <img src="${path}" onerror="this.src='https://via.placeholder.com/120?text=Error'">
+                        <div class="remove-img" onclick="removeImage(${index})"><i class="fas fa-times"></i></div>
+                    `;
+                    imageWrapper.insertBefore(div, uploadTrigger);
+                });
+            }
+
+            window.removeImage = (index) => {
+                uploadedImages.splice(index, 1);
+                renderPreviews();
+            };
+
             // Submit handler
             document.getElementById('save-btn').addEventListener('click', async () => {
+                const btn = document.getElementById('save-btn');
                 const hallData = {
                     subhall_name: document.getElementById('hall_name').value,
                     type: document.getElementById('type').value,
@@ -203,7 +261,7 @@ html(lang="en")
                     discount: parseInt(document.getElementById('discount').value) || null,
                     menu: menus,
                     instructions: document.getElementById('instructions').value,
-                    images: document.getElementById('images').value.split('\n').filter(url => url.trim())
+                    images: uploadedImages
                 };
 
                 if (!hallData.subhall_name || !hallData.address.street_address) {
@@ -211,8 +269,14 @@ html(lang="en")
                     return;
                 }
 
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
                 const success = await HMS.createHall(hallData);
                 if (success) {
                     window.location.href = '/owner/halls';
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-save"></i> Save Hall';
                 }
             });
