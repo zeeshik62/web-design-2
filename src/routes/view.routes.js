@@ -32,19 +32,19 @@ router.get("/register", (req, res) => {
 
 // Owner Portal Views
 router.get("/owner/login", (req, res) => {
-    res.render("owner/login", { title: "Owner Login" });
+    res.render("owner/login", { title: "Owner Login", hideNavbar: true });
 });
 
 router.get("/owner/register", (req, res) => {
-    res.render("owner/register", { title: "Owner Registration" });
+    res.render("owner/register", { title: "Owner Registration", hideNavbar: true });
 });
 
 router.get("/owner/forgot-password", (req, res) => {
-    res.render("owner/forgot-password", { title: "Forgot Password" });
+    res.render("owner/forgot-password", { title: "Forgot Password", hideNavbar: true });
 });
 
 router.get("/owner/reset-password", (req, res) => {
-    res.render("owner/reset-password", { title: "Reset Password" });
+    res.render("owner/reset-password", { title: "Reset Password", hideNavbar: true });
 });
 
 router.get("/owner/dashboard", (req, res) => {

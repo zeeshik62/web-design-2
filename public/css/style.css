@@ -109,6 +109,7 @@ body {
 /* Sidebar */
 .sidebar {
     width: 260px;
+    height: 100vh;
     background-color: var(--sidebar-bg);
     border-right: 1px solid var(--border);
     display: flex;
@@ -116,6 +117,7 @@ body {
     padding: 2rem 1.5rem;
     position: relative;
     z-index: 10;
+    overflow-y: auto;
 }
 
 .logo {

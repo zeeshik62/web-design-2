@@ -11,30 +11,31 @@ html(lang="en")
         link(rel="stylesheet" href="/css/style.css")
         block styles
     body
-        nav.navbar
-            div.container
-                div.nav-left
-                    a.logo(href="/")
-                        i.fas.fa-building-circle-check
-                        span HMS
-                    ul.nav-links
-                        li: a(href="/") Home
-                        li: a(href="/halls") Halls
-                        li: a(href="/vendors") Vendors
-                
-                div.nav-right
-                    ul.nav-links#guest-links
-                        li: a(href="/login") Login
-                        li: a(href="/register") Sign Up
-                        li: a(href="/owner/login" class="owner-link") Owner Portal
+        if !hideNavbar
+            nav.navbar
+                div.container
+                    div.nav-left
+                        a.logo(href="/")
+                            i.fas.fa-building-circle-check
+                            span HMS
+                        ul.nav-links
+                            li: a(href="/") Home
+                            li: a(href="/halls") Halls
+                            li: a(href="/vendors") Vendors
                     
-                    div#user-nav.user-nav(style="display: none;")
-                        div.user-info
-                            div.avatar#user-avatar ?
-                            span.name#user-name User
-                        button.btn-logout(onclick="HMS.logoutCustomer()" title="Logout")
-                            i.fas.fa-sign-out-alt
-                        li: a(href="/owner/login" class="owner-link") Owner Portal
+                    div.nav-right
+                        ul.nav-links#guest-links
+                            li: a(href="/login") Login
+                            li: a(href="/register") Sign Up
+                            li: a(href="/owner/login" class="owner-link") Owner Portal
+                        
+                        div#user-nav.user-nav(style="display: none;")
+                            div.user-info
+                                div.avatar#user-avatar ?
+                                span.name#user-name User
+                            button.btn-logout(onclick="HMS.logoutCustomer()" title="Logout")
+                                i.fas.fa-sign-out-alt
+                            li: a(href="/owner/login" class="owner-link") Owner Portal
 
         
         main.content
