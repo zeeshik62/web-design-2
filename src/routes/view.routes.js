@@ -14,6 +14,14 @@ router.get("/halls/:slug", (req, res) => {
     res.render("hall-detail", { title: "Hall Details" });
 });
 
+router.get("/vendors", (req, res) => {
+    res.render("vendors", { title: "Vendor Listings" });
+});
+
+router.get("/vendors/:slug", (req, res) => {
+    res.render("vendor-detail", { title: "Vendor Details" });
+});
+
 router.get("/login", (req, res) => {
     res.render("login", { title: "User Login" });
 });
