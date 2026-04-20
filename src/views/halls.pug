@@ -37,6 +37,27 @@ block content
                             option(value="Conference Room") Conference Room
                             option(value="Open Roof") Open Roof
                             option(value="Other") Other
+
+                div.filter-item
+                    label Min Price
+                    div.input-with-icon
+                        i.fas.fa-dollar-sign
+                        input#filter-min-price(type="number" placeholder="Min Price")
+
+                div.filter-item
+                    label Max Price
+                    div.input-with-icon
+                        i.fas.fa-dollar-sign
+                        input#filter-max-price(type="number" placeholder="Max Price")
+
+                div.filter-item
+                    label Special Offers
+                    div.input-with-icon
+                        i.fas.fa-tag
+                        select#filter-discount
+                            option(value="") All Venues
+                            option(value="true") With Discount
+                            option(value="false") No Discount
                 
                 button.btn-primary#apply-filters
                     i.fas.fa-filter
@@ -57,11 +78,17 @@ block scripts
             const street = urlParams.get('street');
             const name = urlParams.get('search');
             const type = urlParams.get('type');
+            const minPrice = urlParams.get('min_price');
+            const maxPrice = urlParams.get('max_price');
+            const hasDiscount = urlParams.get('has_discount');
 
             if (city) document.getElementById('filter-city').value = city;
             if (street) document.getElementById('filter-location').value = street;
             if (name) document.getElementById('filter-name').value = name;
             if (type) document.getElementById('filter-type').value = type;
+            if (minPrice) document.getElementById('filter-min-price').value = minPrice;
+            if (maxPrice) document.getElementById('filter-max-price').value = maxPrice;
+            if (hasDiscount) document.getElementById('filter-discount').value = hasDiscount;
 
             // Initial render call will be handled by frontend.js or triggered here
             if (window.renderHallListing) {
@@ -69,7 +96,10 @@ block scripts
                     city: city || '',
                     street: street || '',
                     search: name || '',
-                    type: type || ''
+                    type: type || '',
+                    min_price: minPrice || '',
+                    max_price: maxPrice || '',
+                    has_discount: hasDiscount || ''
                 };
                 window.renderHallListing(filters);
             }
@@ -80,7 +110,10 @@ block scripts
                     search: document.getElementById('filter-name').value.trim(),
                     city: document.getElementById('filter-city').value.trim(),
                     street: document.getElementById('filter-location').value.trim(),
-                    type: document.getElementById('filter-type').value
+                    type: document.getElementById('filter-type').value,
+                    min_price: document.getElementById('filter-min-price').value,
+                    max_price: document.getElementById('filter-max-price').value,
+                    has_discount: document.getElementById('filter-discount').value
                 };
                 
                 if (window.renderHallListing) {
