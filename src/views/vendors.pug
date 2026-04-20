@@ -141,6 +141,26 @@ block content
                         i.fas.fa-magnifying-glass
                         input#filter-name(type="text" placeholder="Search by name...")
 
+ 
+
+                div.filter-item
+                    label City
+                    div.input-with-icon
+                        i.fas.fa-city
+                        input#filter-city(type="text" placeholder="e.g. London")
+
+                div.filter-item
+                    label Min Price
+                    div.input-with-icon
+                        i.fas.fa-dollar-sign
+                        input#filter-min-price(type="number" placeholder="Min Price")
+
+                div.filter-item
+                    label Max Price
+                    div.input-with-icon
+                        i.fas.fa-dollar-sign
+                        input#filter-max-price(type="number" placeholder="Max Price")
+
                 div.filter-item
                     label Category
                     div.input-with-icon
@@ -156,20 +176,13 @@ block content
                             option(value="Make-up Artist") Make-up Artist
 
                 div.filter-item
-                    label City
+                    label Special Offers
                     div.input-with-icon
-                        i.fas.fa-city
-                        input#filter-city(type="text" placeholder="e.g. London")
-
-                div.filter-item
-                    label Staff
-                    div.input-with-icon
-                        i.fas.fa-user-friends
-                        select#filter-staff
-                            option(value="") All Staff
-                            option(value="Male") Male Only
-                            option(value="Female") Female Only
-                            option(value="Both") Both
+                        i.fas.fa-tag
+                        select#filter-discount
+                            option(value="") All Services
+                            option(value="true") With Discount
+                            option(value="false") No Discount
 
                 button.btn-primary#apply-filters
                     i.fas.fa-filter
@@ -188,31 +201,39 @@ block scripts
     script.
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const name     = urlParams.get('search');
-            const city     = urlParams.get('city');
+            const name = urlParams.get('search');
+            const city = urlParams.get('city');
             const category = urlParams.get('category');
-            const staff    = urlParams.get('staff');
+            const minPrice = urlParams.get('min_price');
+            const maxPrice = urlParams.get('max_price');
+            const hasDiscount = urlParams.get('has_discount');
 
-            if (name)     document.getElementById('filter-name').value     = name;
-            if (city)     document.getElementById('filter-city').value     = city;
+            if (name) document.getElementById('filter-name').value = name;
+            if (city) document.getElementById('filter-city').value = city;
             if (category) document.getElementById('filter-category').value = category;
-            if (staff)    document.getElementById('filter-staff').value    = staff;
+            if (minPrice) document.getElementById('filter-min-price').value = minPrice;
+            if (maxPrice) document.getElementById('filter-max-price').value = maxPrice;
+            if (hasDiscount) document.getElementById('filter-discount').value = hasDiscount;
 
             const filters = {
-                search:   name     || '',
-                city:     city     || '',
+                search: name || '',
+                city: city || '',
                 category: category || '',
-                staff:    staff    || ''
+                min_price: minPrice || '',
+                max_price: maxPrice || '',
+                has_discount: hasDiscount || ''
             };
 
             if (window.renderVendorListing) window.renderVendorListing(filters);
 
             document.getElementById('apply-filters').addEventListener('click', () => {
                 const filters = {
-                    search:   document.getElementById('filter-name').value.trim(),
-                    city:     document.getElementById('filter-city').value.trim(),
+                    search: document.getElementById('filter-name').value.trim(),
+                    city: document.getElementById('filter-city').value.trim(),
                     category: document.getElementById('filter-category').value,
-                    staff:    document.getElementById('filter-staff').value
+                    min_price: document.getElementById('filter-min-price').value,
+                    max_price: document.getElementById('filter-max-price').value,
+                    has_discount: document.getElementById('filter-discount').value
                 };
 
                 if (window.renderVendorListing) {
