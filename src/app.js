@@ -3,14 +3,9 @@ const cors = require("cors");
 const path = require("path");
 
 const routes = require("./routes");
-const viewRoutes = require("./routes/view.routes");
 // const { notFound, errorMiddleware } = require("./middlewares/error.middleware");
 
 const app = express();
-
-// View Engine Setup
-app.set("view engine", "pug");
-app.set("views", path.join(__dirname, "views"));
 
 // Track every incoming request
 app.use((req, res, next) => {
@@ -23,9 +18,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.resolve("public")));
-
-// View Routes
-app.use("/", viewRoutes);
 
 // API Routes
 app.use("/api", routes);
