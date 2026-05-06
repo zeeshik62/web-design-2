@@ -56,7 +56,6 @@ const OwnerLogin = () => {
           <div style={{ marginBottom: '30px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
               <label>Password</label>
-              <Link to="/owner/forgot-password" style={{ color: 'var(--primary-color)', fontSize: '14px', textDecoration: 'none' }}>Forgot Password?</Link>
             </div>
             <input 
               type="password" 
@@ -72,6 +71,9 @@ const OwnerLogin = () => {
         </form>
         
         <p style={{ textAlign: 'center', marginTop: '20px' }}>
+          <Link to="/owner/forgot-password" style={{ color: 'var(--primary-color)', fontSize: '14px', textDecoration: 'none' }}>Forgot Password?</Link>
+        </p>
+        <p style={{ textAlign: 'center', marginTop: '10px' }}>
           Don't have an account? <Link to="/owner/register" className="text-primary">Register here</Link>
         </p>
       </div>

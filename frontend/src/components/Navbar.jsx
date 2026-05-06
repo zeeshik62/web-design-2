@@ -24,7 +24,11 @@ const Navbar = () => {
           <Link to="/halls" className="nav-link"><List size={18} /> Halls</Link>
           <Link to="/vendors" className="nav-link"><Users size={18} /> Vendors</Link>
         </div>
-        <div className="navbar-actions">
+        <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <Link to="/owner/login" className="nav-link" style={{ fontWeight: 'bold', border: '1px solid var(--primary-color)', padding: '6px 12px', borderRadius: '6px', color: 'var(--primary-color)' }}>
+            List Business
+          </Link>
+          
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold' }}>
@@ -35,10 +39,10 @@ const Navbar = () => {
               </button>
             </div>
           ) : (
-            <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Link to="/login" className="btn-secondary">Login</Link>
               <Link to="/register" className="btn-primary">Register</Link>
-            </>
+            </div>
           )}
         </div>
       </div>
