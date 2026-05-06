@@ -6,7 +6,7 @@ import { AuthContext } from '../../context/AuthContext';
 const OwnerVerify = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useContext(AuthContext);
+  const { loginOwner } = useContext(AuthContext);
 
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -28,7 +28,7 @@ const OwnerVerify = () => {
     try {
       const response = await api.post('/auth/verify-registration', { email, otp });
       if (response.data.success) {
-        login(response.data.token, response.data.data);
+        loginOwner(response.data.token, response.data.data);
         navigate('/owner/dashboard');
       }
     } catch (err) {

@@ -9,10 +9,19 @@ const api = axios.create({
   },
 });
 
-// Add a request interceptor to include the JWT token
+// Add a request interceptor to include the correct JWT token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    // Determine which token to use based on the URL
+    // Owner routes start with /hall_owner
+    let token = null;
+    if (config.url.includes('/hall_owner')) {
+      token = localStorage.getItem('owner_token');
+    } else {
+      // Default to customer token for all other requests
+      token = localStorage.getItem('customer_token');
+    }
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,10 +37,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Token might be expired or invalid
-      // We can clear localStorage here or handle it in AuthContext
       console.error('Unauthorized request. Token may be expired.');
-      // Optional: you could force a logout here if you imported AuthContext
     }
     return Promise.reject(error);
   }

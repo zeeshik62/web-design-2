@@ -5,8 +5,8 @@ import { AuthContext } from '../context/AuthContext';
 import './OwnerLayout.css';
 
 const OwnerLayout = () => {
-  const { user } = useContext(AuthContext);
-  const displayName = user?.brand_name || user?.name || 'Owner';
+  const { owner } = useContext(AuthContext);
+  const displayName = owner?.brand_name || owner?.name || 'Owner';
 
   return (
     <div className="owner-layout">

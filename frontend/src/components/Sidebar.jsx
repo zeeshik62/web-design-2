@@ -5,11 +5,11 @@ import { AuthContext } from '../context/AuthContext';
 import './Sidebar.css';
 
 const Sidebar = () => {
-  const { logout } = useContext(AuthContext);
+  const { logoutOwner } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
+    logoutOwner();
     navigate('/owner/login');
   };
 

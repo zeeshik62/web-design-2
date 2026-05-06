@@ -5,23 +5,23 @@ import { AuthContext } from '../../context/AuthContext';
 
 const OwnerLogin = () => {
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+    const { loginOwner } = useContext(AuthContext);
+    
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
   
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const response = await api.post('/auth/login', { email, password });
-      if (response.data.success) {
-        login(response.data.token, { ...response.data.data, role: 'owner' });
-        navigate('/owner/dashboard');
-      }
+    const handleLogin = async (e) => {
+      e.preventDefault();
+      setError('');
+      setLoading(true);
+      try {
+        const response = await api.post('/auth/login', { email, password });
+        if (response.data.success) {
+          loginOwner(response.data.token, { ...response.data.data, role: 'owner' });
+          navigate('/owner/dashboard');
+        }
     } catch (err) {
       // Handle Unverified Account (403 status code from backend)
       if (err.response?.status === 403) {
