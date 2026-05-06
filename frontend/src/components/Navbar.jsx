@@ -1,9 +1,18 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
-import { Home, List, Users, LogIn } from 'lucide-react';
+import { Home, List, Users, LogOut, User } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const Navbar = () => {
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <nav className="navbar glass">
       <div className="container navbar-container">
@@ -16,8 +25,21 @@ const Navbar = () => {
           <Link to="/vendors" className="nav-link"><Users size={18} /> Vendors</Link>
         </div>
         <div className="navbar-actions">
-          <Link to="/login" className="btn-secondary">Login</Link>
-          <Link to="/register" className="btn-primary">Register</Link>
+          {user ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold' }}>
+                <User size={18} /> {user.name}
+              </span>
+              <button onClick={handleLogout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger-color, #dc3545)', display: 'flex', alignItems: 'center' }} title="Logout">
+                <LogOut size={20} />
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link to="/login" className="btn-secondary">Login</Link>
+              <Link to="/register" className="btn-primary">Register</Link>
+            </>
+          )}
         </div>
       </div>
     </nav>
