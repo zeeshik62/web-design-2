@@ -1,9 +1,18 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Home, Users, MessageSquare, User, LogOut } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 import './Sidebar.css';
 
 const Sidebar = () => {
+  const { logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/owner/login');
+  };
+
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
@@ -30,7 +39,7 @@ const Sidebar = () => {
         </NavLink>
       </nav>
       <div className="sidebar-footer">
-        <button className="sidebar-link text-danger">
+        <button className="sidebar-link text-danger" onClick={handleLogout}>
           <LogOut size={20} /> Logout
         </button>
       </div>

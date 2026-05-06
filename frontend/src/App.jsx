@@ -22,6 +22,10 @@ import OwnerCustomers from './pages/owner/Customers';
 import OwnerQueries from './pages/owner/Queries';
 import OwnerProfile from './pages/owner/Profile';
 import OwnerLogin from './pages/owner/Login';
+import OwnerRegister from './pages/owner/Register';
+import OwnerVerify from './pages/owner/Verify';
+import OwnerForgotPassword from './pages/owner/ForgotPassword';
+import OwnerResetPassword from './pages/owner/ResetPassword';
 
 function App() {
   return (
@@ -38,8 +42,12 @@ function App() {
           <Route path="register" element={<Register />} />
         </Route>
 
-        {/* Owner Auth Route (No Sidebar) */}
+        {/* Owner Auth Routes (No Sidebar) */}
         <Route path="/owner/login" element={<OwnerLogin />} />
+        <Route path="/owner/register" element={<OwnerRegister />} />
+        <Route path="/owner/verify" element={<OwnerVerify />} />
+        <Route path="/owner/forgot-password" element={<OwnerForgotPassword />} />
+        <Route path="/owner/reset-password" element={<OwnerResetPassword />} />
 
         {/* Owner Dashboard Routes with OwnerLayout */}
         <Route path="/owner" element={<OwnerLayout />}>
