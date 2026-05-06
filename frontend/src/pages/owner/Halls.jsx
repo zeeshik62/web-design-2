@@ -1,6 +1,37 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axios';
-import { Trash2, Eye, EyeOff, Pencil, X, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trash2, Eye, EyeOff, Pencil, X, CheckCircle, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+
+// Reusable Menu Category Builder
+const MenuCategoryInput = ({ label, items, onAdd, onRemove, inputVal, onInputChange }) => (
+  <div style={{ gridColumn: '1 / -1' }}>
+    <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '600' }}>{label}</label>
+    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+      <input
+        style={{ flex: 1, padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.07)', color: 'var(--text-color)', fontSize: '13px' }}
+        value={inputVal}
+        onChange={e => onInputChange(e.target.value)}
+        placeholder={`Add ${label} item...`}
+        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); onAdd(); } }}
+      />
+      <button type="button" onClick={onAdd} style={{ background: 'var(--primary-color)', border: 'none', borderRadius: '6px', padding: '8px 14px', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center' }}>
+        <Plus size={16} />
+      </button>
+    </div>
+    {items.length > 0 && (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+        {items.map((item, idx) => (
+          <span key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.1)', padding: '3px 10px', borderRadius: '20px', fontSize: '13px' }}>
+            {item}
+            <button type="button" onClick={() => onRemove(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f87171', display: 'flex', padding: '0', marginLeft: '2px' }}>
+              <X size={12} />
+            </button>
+          </span>
+        ))}
+      </div>
+    )}
+  </div>
+);
 
 const inputStyle = { width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.07)', color: 'var(--text-color)', fontSize: '14px' };
 
@@ -18,7 +49,22 @@ const Halls = () => {
 
   // Add New Modal State
   const [showAddModal, setShowAddModal] = useState(false);
+  const emptyMenu = { starter: [], main_course: [], drinks: [], desserts: [] };
+  const emptyMenuInput = { starter: '', main_course: '', drinks: '', desserts: '' };
   const emptyForm = { subhall_name: '', type: 'Marquee', sitting_capacity: '', parking_capacity: '', starting_price: '', discount: '', instructions: '', street_address: '', city: '', country: 'United Kingdom', is_public: true };
+  const [addMenu, setAddMenu] = useState(emptyMenu);
+  const [addMenuInput, setAddMenuInput] = useState(emptyMenuInput);
+
+  const addMenuItem = (category) => {
+    const val = addMenuInput[category].trim();
+    if (!val) return;
+    setAddMenu(prev => ({ ...prev, [category]: [...prev[category], val] }));
+    setAddMenuInput(prev => ({ ...prev, [category]: '' }));
+  };
+
+  const removeMenuItem = (category, idx) => {
+    setAddMenu(prev => ({ ...prev, [category]: prev[category].filter((_, i) => i !== idx) }));
+  };
   const [addForm, setAddForm] = useState(emptyForm);
   const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState('');
@@ -135,6 +181,12 @@ const Halls = () => {
           street_address: addForm.street_address,
           city: addForm.city,
           country: addForm.country,
+        },
+        menu: {
+          starter: addMenu.starter,
+          main_course: addMenu.main_course,
+          drinks: addMenu.drinks,
+          desserts: addMenu.desserts,
         }
       };
       const res = await api.post('/hall_owner/subhalls', payload);
@@ -154,7 +206,7 @@ const Halls = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <h1>My SubHalls</h1>
-        <button className="btn-primary" onClick={() => { setShowAddModal(true); setAddForm(emptyForm); setAddError(''); setAddSuccess(''); }}>+ Add New SubHall</button>
+        <button className="btn-primary" onClick={() => { setShowAddModal(true); setAddForm(emptyForm); setAddMenu(emptyMenu); setAddMenuInput(emptyMenuInput); setAddError(''); setAddSuccess(''); }}>+ Add New SubHall</button>
       </div>
 
       <div className="glass-card" style={{ overflow: 'hidden' }}>
@@ -379,6 +431,18 @@ const Halls = () => {
                     <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px' }}>Instructions / Notes</label>
                     <textarea rows="3" style={{ ...inputStyle, resize: 'vertical' }} value={addForm.instructions} onChange={e => setAddForm(p => ({ ...p, instructions: e.target.value }))} placeholder="Any special notes for customers..." />
                   </div>
+
+                  {/* Menu Builder Section */}
+                  <div style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '18px', marginTop: '4px' }}>
+                    <h4 style={{ marginBottom: '16px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>🍽️ Menu (Optional)</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                      <MenuCategoryInput label="Starters" items={addMenu.starter} inputVal={addMenuInput.starter} onInputChange={v => setAddMenuInput(p => ({ ...p, starter: v }))} onAdd={() => addMenuItem('starter')} onRemove={idx => removeMenuItem('starter', idx)} />
+                      <MenuCategoryInput label="Main Course" items={addMenu.main_course} inputVal={addMenuInput.main_course} onInputChange={v => setAddMenuInput(p => ({ ...p, main_course: v }))} onAdd={() => addMenuItem('main_course')} onRemove={idx => removeMenuItem('main_course', idx)} />
+                      <MenuCategoryInput label="Drinks" items={addMenu.drinks} inputVal={addMenuInput.drinks} onInputChange={v => setAddMenuInput(p => ({ ...p, drinks: v }))} onAdd={() => addMenuItem('drinks')} onRemove={idx => removeMenuItem('drinks', idx)} />
+                      <MenuCategoryInput label="Desserts" items={addMenu.desserts} inputVal={addMenuInput.desserts} onInputChange={v => setAddMenuInput(p => ({ ...p, desserts: v }))} onAdd={() => addMenuItem('desserts')} onRemove={idx => removeMenuItem('desserts', idx)} />
+                    </div>
+                  </div>
+
                   <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <input type="checkbox" id="is_public_add" checked={addForm.is_public} onChange={e => setAddForm(p => ({ ...p, is_public: e.target.checked }))} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
                     <label htmlFor="is_public_add" style={{ cursor: 'pointer', fontSize: '14px' }}>Make Publicly Visible</label>
