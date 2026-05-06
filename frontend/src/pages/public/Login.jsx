@@ -1,16 +1,20 @@
 import React, { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import { AuthContext } from '../../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useContext(AuthContext);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Extract returnUrl from state if it was passed
+  const returnUrl = location.state?.returnUrl || '/';
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -22,8 +26,8 @@ const Login = () => {
       if (response.data.success) {
         // Save token and user data in AuthContext
         login(response.data.token, response.data.data);
-        // Redirect to homepage
-        navigate('/');
+        // Redirect to previous page or homepage
+        navigate(returnUrl);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
