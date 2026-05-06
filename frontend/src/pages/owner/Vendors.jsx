@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axios';
 import { Trash2, Eye, EyeOff, Pencil, X, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import ImageUploader from '../../components/ImageUploader';
 
 const inputStyle = { width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.07)', color: 'var(--text-color)', fontSize: '14px' };
 
@@ -23,6 +24,21 @@ const Vendors = () => {
   const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState('');
   const [addSuccess, setAddSuccess] = useState('');
+  const [addImages, setAddImages] = useState([]);
+
+  // Upload images to backend, returns array of URL paths
+  const uploadImages = async (files, type) => {
+    const paths = [];
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await api.post(`/hall_owner/upload/${type}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.data.success) paths.push(res.data.data.path);
+    }
+    return paths;
+  };
 
   // Confirm Delete State
   const [deletingId, setDeletingId] = useState(null);
@@ -135,11 +151,16 @@ const Vendors = () => {
           country: addForm.country,
         }
       };
+      // Upload images first, then attach their paths
+      if (addImages.length > 0) {
+        const uploadedPaths = await uploadImages(addImages, 'vendor');
+        payload.images = uploadedPaths;
+      }
       const res = await api.post('/hall_owner/vendors', payload);
       if (res.data.success) {
         setAddSuccess('Vendor created successfully!');
         fetchVendors(1);
-        setTimeout(() => { setShowAddModal(false); setAddForm(emptyForm); setAddSuccess(''); }, 1200);
+        setTimeout(() => { setShowAddModal(false); setAddForm(emptyForm); setAddImages([]); setAddSuccess(''); }, 1200);
       }
     } catch (err) {
       setAddError(err.response?.data?.message || 'Failed to create Vendor.');
@@ -152,7 +173,7 @@ const Vendors = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <h1>My Vendors</h1>
-        <button className="btn-primary" onClick={() => { setShowAddModal(true); setAddForm(emptyForm); setAddError(''); setAddSuccess(''); }}>+ Add New Vendor</button>
+        <button className="btn-primary" onClick={() => { setShowAddModal(true); setAddForm(emptyForm); setAddImages([]); setAddError(''); setAddSuccess(''); }}>+ Add New Vendor</button>
       </div>
 
       <div className="glass-card" style={{ overflow: 'hidden' }}>
@@ -368,6 +389,13 @@ const Vendors = () => {
                     <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px' }}>Instructions / Notes</label>
                     <textarea rows="3" style={{ ...inputStyle, resize: 'vertical' }} value={addForm.instructions} onChange={e => setAddForm(p => ({ ...p, instructions: e.target.value }))} placeholder="Any special notes for customers..." />
                   </div>
+                  {/* Image Upload Section */}
+                  <ImageUploader
+                    files={addImages}
+                    onChange={setAddImages}
+                    label="Vendor Images"
+                    maxImages={5}
+                  />
                   <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <input type="checkbox" id="vendor_is_public_add" checked={addForm.is_public} onChange={e => setAddForm(p => ({ ...p, is_public: e.target.checked }))} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
                     <label htmlFor="vendor_is_public_add" style={{ cursor: 'pointer', fontSize: '14px' }}>Make Publicly Visible</label>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axios';
 import { Trash2, Eye, EyeOff, Pencil, X, CheckCircle, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import ImageUploader from '../../components/ImageUploader';
 
 // Reusable Menu Category Builder
 const MenuCategoryInput = ({ label, items, onAdd, onRemove, inputVal, onInputChange }) => (
@@ -54,6 +55,21 @@ const Halls = () => {
   const emptyForm = { subhall_name: '', type: 'Marquee', sitting_capacity: '', parking_capacity: '', starting_price: '', discount: '', instructions: '', street_address: '', city: '', country: 'United Kingdom', is_public: true };
   const [addMenu, setAddMenu] = useState(emptyMenu);
   const [addMenuInput, setAddMenuInput] = useState(emptyMenuInput);
+  const [addImages, setAddImages] = useState([]);
+
+  // Upload images to backend, returns array of URL paths
+  const uploadImages = async (files, type) => {
+    const paths = [];
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await api.post(`/hall_owner/upload/${type}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.data.success) paths.push(res.data.data.path);
+    }
+    return paths;
+  };
 
   const addMenuItem = (category) => {
     const val = addMenuInput[category].trim();
@@ -189,11 +205,16 @@ const Halls = () => {
           desserts: addMenu.desserts,
         }
       };
+      // Upload images first, then attach their paths
+      if (addImages.length > 0) {
+        const uploadedPaths = await uploadImages(addImages, 'subhall');
+        payload.images = uploadedPaths;
+      }
       const res = await api.post('/hall_owner/subhalls', payload);
       if (res.data.success) {
         setAddSuccess('SubHall created successfully!');
         fetchHalls(1);
-        setTimeout(() => { setShowAddModal(false); setAddForm(emptyForm); setAddSuccess(''); }, 1200);
+        setTimeout(() => { setShowAddModal(false); setAddForm(emptyForm); setAddImages([]); setAddSuccess(''); }, 1200);
       }
     } catch (err) {
       setAddError(err.response?.data?.message || 'Failed to create SubHall.');
@@ -206,7 +227,7 @@ const Halls = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <h1>My SubHalls</h1>
-        <button className="btn-primary" onClick={() => { setShowAddModal(true); setAddForm(emptyForm); setAddMenu(emptyMenu); setAddMenuInput(emptyMenuInput); setAddError(''); setAddSuccess(''); }}>+ Add New SubHall</button>
+        <button className="btn-primary" onClick={() => { setShowAddModal(true); setAddForm(emptyForm); setAddMenu(emptyMenu); setAddMenuInput(emptyMenuInput); setAddImages([]); setAddError(''); setAddSuccess(''); }}>+ Add New SubHall</button>
       </div>
 
       <div className="glass-card" style={{ overflow: 'hidden' }}>
@@ -442,6 +463,14 @@ const Halls = () => {
                       <MenuCategoryInput label="Desserts" items={addMenu.desserts} inputVal={addMenuInput.desserts} onInputChange={v => setAddMenuInput(p => ({ ...p, desserts: v }))} onAdd={() => addMenuItem('desserts')} onRemove={idx => removeMenuItem('desserts', idx)} />
                     </div>
                   </div>
+
+                  {/* Image Upload Section */}
+                  <ImageUploader
+                    files={addImages}
+                    onChange={setAddImages}
+                    label="SubHall Images"
+                    maxImages={5}
+                  />
 
                   <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <input type="checkbox" id="is_public_add" checked={addForm.is_public} onChange={e => setAddForm(p => ({ ...p, is_public: e.target.checked }))} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />

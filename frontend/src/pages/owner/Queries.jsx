@@ -2,13 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axios';
 import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 
-const STATUS_OPTIONS = ['pending', 'confirmed', 'cancelled'];
+const STATUS_OPTIONS = ['pending', 'responded', 'spam'];
 
 const statusStyle = (status) => {
   const map = {
     pending:   { background: 'rgba(250,204,21,0.15)',  color: '#facc15' },
-    confirmed: { background: 'rgba(74,222,128,0.15)',  color: '#4ade80' },
-    cancelled: { background: 'rgba(248,113,113,0.15)', color: '#f87171' },
+    responded: { background: 'rgba(74,222,128,0.15)',  color: '#4ade80' },
+    spam:      { background: 'rgba(248,113,113,0.15)', color: '#f87171' },
   };
   return { padding: '3px 10px', borderRadius: '10px', fontSize: '12px', fontWeight: '600', ...(map[status] || map.pending) };
 };

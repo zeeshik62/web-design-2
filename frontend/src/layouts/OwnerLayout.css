@@ -27,3 +27,9 @@
   padding: 30px;
   flex: 1;
 }
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
