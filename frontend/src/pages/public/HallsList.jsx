@@ -22,6 +22,15 @@ const HallsList = () => {
     fetchHalls();
   }, []);
 
+  // Use the newly generated default hall image stored in the backend
+  const fallbackImage = "http://localhost:5000/uploads/subhall/default-hall.png";
+
+  const getImageUrl = (imageName) => {
+    if (!imageName) return fallbackImage;
+    if (imageName.startsWith('http')) return imageName;
+    return `http://localhost:5000/uploads/subhall/${imageName}`;
+  };
+
   return (
     <div className="container" style={{ padding: '40px 20px' }}>
       <h1 style={{ marginBottom: '30px' }}>Available Halls</h1>
@@ -29,17 +38,37 @@ const HallsList = () => {
       {loading ? (
         <p>Loading halls...</p>
       ) : halls.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '30px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '25px' }}>
           {halls.map((hall) => (
             <Link to={`/halls/${hall.slug || hall._id}`} key={hall._id} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div className="glass-card" style={{ padding: '20px', transition: 'transform 0.3s', cursor: 'pointer' }}>
-                <h3 style={{ marginBottom: '10px' }}>{hall.name}</h3>
-                <p style={{ color: 'var(--text-light)', marginBottom: '10px' }}>
-                  Capacity: {hall.capacity?.min} - {hall.capacity?.max}
-                </p>
-                <p style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>
-                  Price: ${hall.price}
-                </p>
+              <div className="glass-card" style={{ transition: 'transform 0.3s', cursor: 'pointer', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%', fontSize: '14px' }}>
+                {/* Image Section - Smaller height */}
+                <div style={{ width: '100%', height: '180px', overflow: 'hidden' }}>
+                  <img 
+                    src={hall.images && hall.images.length > 0 ? getImageUrl(hall.images[0]) : fallbackImage} 
+                    alt={hall.subhall_name} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </div>
+                
+                {/* Content Section - Adjusted padding */}
+                <div style={{ padding: '15px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+                  <h3 style={{ marginBottom: '8px', fontSize: '1.2rem' }}>{hall.subhall_name}</h3>
+                  <div style={{ color: 'var(--text-light)', marginBottom: '10px', fontSize: '13px', flexGrow: 1 }}>
+                    <p style={{ marginBottom: '4px' }}>Type: {hall.type}</p>
+                    <p style={{ marginBottom: '4px' }}>Capacity: {hall.sitting_capacity} persons</p>
+                    <p style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>
+                      Starting Price: ${hall.starting_price}
+                    </p>
+                  </div>
+                  
+                  {/* Address at the bottom */}
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', marginTop: 'auto' }}>
+                    <p style={{ fontSize: '12px', color: 'var(--text-light)', margin: 0 }}>
+                      📍 {hall.address?.street_address}, {hall.address?.city}, {hall.address?.country}
+                    </p>
+                  </div>
+                </div>
               </div>
             </Link>
           ))}
