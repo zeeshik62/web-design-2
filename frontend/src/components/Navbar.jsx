@@ -25,11 +25,17 @@ const Navbar = () => {
           <Link to="/vendors" className="nav-link"><Users size={18} /> Vendors</Link>
         </div>
         <div className="navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <Link to="/owner/login" className="nav-link" style={{ fontWeight: 'bold', border: '1px solid var(--primary-color)', padding: '6px 12px', borderRadius: '6px', color: 'var(--primary-color)' }}>
-            List Business
-          </Link>
+          {user?.role === 'owner' ? (
+            <Link to="/owner/dashboard" className="nav-link" style={{ fontWeight: 'bold', border: '1px solid var(--primary-color)', padding: '6px 12px', borderRadius: '6px', color: 'var(--primary-color)' }}>
+              Go to Dashboard
+            </Link>
+          ) : (
+            <Link to="/owner/login" className="nav-link" style={{ fontWeight: 'bold', border: '1px solid var(--primary-color)', padding: '6px 12px', borderRadius: '6px', color: 'var(--primary-color)' }}>
+              List Business
+            </Link>
+          )}
           
-          {user ? (
+          {user && user.role === 'customer' ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold' }}>
                 <User size={18} /> {user.name}
@@ -38,12 +44,16 @@ const Navbar = () => {
                 <LogOut size={20} />
               </button>
             </div>
-          ) : (
+          ) : !user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Link to="/login" className="btn-secondary">Login</Link>
               <Link to="/register" className="btn-primary">Register</Link>
             </div>
-          )}
+          ) : user.role === 'owner' ? (
+            <button onClick={handleLogout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger-color, #dc3545)', display: 'flex', alignItems: 'center' }} title="Logout Owner">
+              <LogOut size={20} />
+            </button>
+          ) : null}
         </div>
       </div>
     </nav>

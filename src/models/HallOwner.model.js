@@ -16,6 +16,7 @@ const HallOwnerSchema = new mongoose.Schema(
     contact: { type: String, required: true },
     address: { type: AddressSchema, required: true },
     image: { type: String, default: "" },
+    cover_image: { type: String, default: "" },
     otp: { type: String, default: null },
     is_verified: { type: Boolean, default: false },
     is_public: { type: Boolean, default: true }

@@ -70,7 +70,7 @@ class HallOwnerService {
 
     updateProfile = async (req, res) => {
         try {
-            const { name, brand_name, contact, address, image, is_public } = req.body;
+            const { name, brand_name, contact, address, image, cover_image, is_public } = req.body;
             const ownerId = req.user.owner_id;
 
             const owner = await HallOwner.findById(ownerId);
@@ -88,6 +88,7 @@ class HallOwnerService {
                 owner.address = address;
             }
             if (image !== undefined) owner.image = image;
+            if (cover_image !== undefined) owner.cover_image = cover_image;
             if (is_public !== undefined) owner.is_public = is_public;
 
             // Generate new slug if brand_name changes

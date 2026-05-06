@@ -16,6 +16,8 @@ const Vendors = () => {
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
   const [editSuccess, setEditSuccess] = useState('');
+  const [editExistingImages, setEditExistingImages] = useState([]);
+  const [editNewImages, setEditNewImages] = useState([]);
 
   // Add New Modal State
   const [showAddModal, setShowAddModal] = useState(false);
@@ -94,6 +96,8 @@ const Vendors = () => {
       city: vendor.address?.city || '',
       country: vendor.address?.country || '',
     });
+    setEditExistingImages(vendor.images || []);
+    setEditNewImages([]);
     setEditError('');
     setEditSuccess('');
   };
@@ -116,6 +120,12 @@ const Vendors = () => {
           country: editForm.country,
         }
       };
+      let finalImages = [...editExistingImages];
+      if (editNewImages.length > 0) {
+        const uploadedPaths = await uploadImages(editNewImages, 'vendor');
+        finalImages = [...finalImages, ...uploadedPaths];
+      }
+      payload.images = finalImages;
       const res = await api.put(`/hall_owner/vendors/${editingVendor._id}`, payload);
       if (res.data.success) {
         setEditSuccess('Vendor updated successfully!');
@@ -319,6 +329,24 @@ const Vendors = () => {
                   <div style={{ gridColumn: '1 / -1' }}>
                     <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px' }}>Instructions</label>
                     <textarea rows="3" style={{ ...inputStyle, resize: 'vertical' }} value={editForm.instructions} onChange={e => setEditForm(p => ({ ...p, instructions: e.target.value }))} />
+                  </div>
+
+                  {/* Image Management */}
+                  <div style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '18px', marginTop: '4px' }}>
+                    <h4 style={{ fontSize: '14px', marginBottom: '12px' }}>🖼️ Images</h4>
+                    {editExistingImages.length > 0 && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '8px', marginBottom: '12px' }}>
+                        {editExistingImages.map((src, idx) => (
+                          <div key={idx} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', aspectRatio: '1', background: '#111' }}>
+                            <img src={src} alt={`img-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => e.target.src = 'https://via.placeholder.com/100'} />
+                            <button type="button" onClick={() => setEditExistingImages(prev => prev.filter((_, i) => i !== idx))} style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.7)', border: 'none', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}>
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <ImageUploader files={editNewImages} onChange={setEditNewImages} label="Add More Images" maxImages={5 - editExistingImages.length} />
                   </div>
                 </div>
                 <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '20px', padding: '12px' }} disabled={editLoading}>

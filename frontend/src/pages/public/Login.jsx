@@ -25,7 +25,7 @@ const Login = () => {
       const response = await api.post('/customer/auth/login', { email, password });
       if (response.data.success) {
         // Save token and user data in AuthContext
-        login(response.data.token, response.data.data);
+        login(response.data.token, { ...response.data.data, role: 'customer' });
         // Redirect to previous page or homepage
         navigate(returnUrl);
       }

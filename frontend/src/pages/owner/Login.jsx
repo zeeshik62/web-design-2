@@ -19,7 +19,7 @@ const OwnerLogin = () => {
     try {
       const response = await api.post('/auth/login', { email, password });
       if (response.data.success) {
-        login(response.data.token, response.data.data);
+        login(response.data.token, { ...response.data.data, role: 'owner' });
         navigate('/owner/dashboard');
       }
     } catch (err) {
